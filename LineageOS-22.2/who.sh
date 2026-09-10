@@ -309,47 +309,30 @@ install_aurorastore()
     add_to_device_mk "AuroraStore"
 }
 
-# ============================================================
-# Auxio Music Player
-# ============================================================
-# Descricao: Baixa e integra o player de musica Auxio como
-# aplicativo prebuilt no build do Android para o Xiaomi Sapphire
-#
-# Caracteristicas:
-#   - Player minimalista e open-source (F-Droid)
-#   - Interface moderna baseada em Material You
-#   - Suporte a tags e albuns com alta performance
-#   - Sem dependencias do Google Services
-#
-# Site oficial: https://auxio.app/
-# Fonte: https://f-droid.org/packages/org.oxycblt.auxio/
-# ============================================================
-
-install_auxio() 
-{
-    mkdir -p device/xiaomi/sapphire/prebuilt/auxio
+install_gramophone() {
+    echo -e "${CYAN}Cloning Gramophone prebuilt...${RESET}"
+    mkdir -p device/xiaomi/sapphire/prebuilt/gramophone
     
-    wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/auxio/Auxio.apk \
-        "https://f-droid.org/repo/org.oxycblt.auxio_75.apk" \
-        || { echo -e "${RED}[ERRO] Falha ao baixar Auxio.apk${RESET}"; return 1; }
+    wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/gramophone/Gramophone.apk \
+        "https://f-droid.org/repo/org.akanework.gramophone_10002.apk" \
+        || { echo "[ERRO] Falha ao baixar Gramophone.apk"; return 1; }
     
-    cat > device/xiaomi/sapphire/prebuilt/auxio/Android.bp << 'EOF'
+    cat > device/xiaomi/sapphire/prebuilt/gramophone/Android.bp << 'EOF'
 android_app_import {
-    name: "Auxio",
-    apk: "Auxio.apk",
+    name: "Gramophone",
+    apk: "Gramophone.apk",
     presigned: true,
     preprocessed: true,
     product_specific: true,
     dex_preopt: {
         enabled: false,
     },
-    overrides: ["Twelve", "Music", "Eleven"],
+    overrides: ["Twelve"],
 }
 EOF
     
-    add_to_device_mk "Auxio"
-    
-    echo -e "${GREEN}Auxio instalado com sucesso em device/xiaomi/sapphire/prebuilt/auxio/${RESET}"
+    print_header "Gramophone prebuilt cloned to device/xiaomi/sapphire/prebuilt/gramophone"
+    add_to_device_mk "Gramophone"
 }
 
 #####################################
@@ -519,6 +502,7 @@ patch_version_mk; clear
  install_thunderbird
  install_aurorastore
  install_davx5
+ install_gramophone
 gofile_install; clear
 
 
