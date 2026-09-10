@@ -502,7 +502,7 @@ patch_version_mk; clear
  install_thunderbird
  install_aurorastore
  install_davx5
- install_gramophone
+ # install_gramophone
 gofile_install; clear
 
 
