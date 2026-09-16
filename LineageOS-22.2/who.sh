@@ -314,7 +314,7 @@ install_gramophone() {
     mkdir -p device/xiaomi/sapphire/prebuilt/gramophone
     
     wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/gramophone/Gramophone.apk \
-        "https://f-droid.org/repo/org.akanework.gramophone_10002.apk" \
+        "https://f-droid.org/repo/org.akanework.gramophone_24.apk" \
         || { echo "[ERRO] Falha ao baixar Gramophone.apk"; return 1; }
     
     cat > device/xiaomi/sapphire/prebuilt/gramophone/Android.bp << 'EOF'
