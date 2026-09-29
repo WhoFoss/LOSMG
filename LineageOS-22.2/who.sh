@@ -4,7 +4,7 @@
 # Autor: WhoFoss <https://github.com/WhoFoss>                       #
 # Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
 # Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
-# Script: LOSMG                                                   #
+# Script: LOSMG                                                     #
 # DESCRIÇÃO: Build automatizado do LineageOS 22.2 com MicroG para   #
 #            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
 #            Faz repo init/sync, clone de device tree/HALs/pacotes  #
@@ -18,7 +18,6 @@
 #----------------------------------#
 # Cores
 #----------------------------------#
-#####################################
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -30,7 +29,6 @@ RESET='\033[0m'
 #----------------------------------#
 # Setup do Terminal
 #----------------------------------#
-#####################################
 echo -en "\033[?25l"  # esconde o cursor
 trap 'echo -en "\033[?12l\033[?25h"' EXIT  # restaura ao sair
 
@@ -38,7 +36,6 @@ trap 'echo -en "\033[?12l\033[?25h"' EXIT  # restaura ao sair
 #----------------------------------#
 # Funções Auxiliares
 #----------------------------------#
-#####################################
 
 # Imprime mensagem de erro formatada com timestamp e encerra o script.
 error_exit() {
@@ -49,11 +46,9 @@ error_exit() {
     exit "$exit_code"
 }
 
-#####################################
 #----------------------------------#
-# Verifica se existe um .repo residual no HOME e aborta caso encontrado.
+# Verifica se existe um .repo residual no HOME e aborta caso encontrado. - 29/09/2026
 #----------------------------------#
-#####################################
 check_repo_valid() {
     local repo_dir="$HOME/.repo"
 
@@ -68,8 +63,8 @@ check_repo_valid() {
     fi
 }
 
-# Imprime a mensagem 
-print_header()
+# Imprime a mensagem - 29/09/2026
+print_header() 
 {
     echo -e "${3:-$B}>>>${RESET} ${1}"
 }
@@ -90,7 +85,7 @@ clone_repo()
     print_header "${dest} clone success" "#" "$YELLOW"
 }
 
-# Clona um repositório de HAL, sobrescrevendo o path caso já exista.
+# Clona um repositório de HAL, sobrescrevendo o path caso já exista. 
 clone_hal() 
 {
     local url=$1
@@ -100,7 +95,7 @@ clone_hal()
     git clone --depth 1 -b "$branch" "$url" "$path" || error_exit "Failed to clone HAL $path"
 }
 
-# Adiciona um pacote em PRODUCT_PACKAGES do device.mk
+# Adiciona um pacote em PRODUCT_PACKAGES do device.mk - 29/09/2026
 add_to_device_mk()
 {
     local package=$1
@@ -263,7 +258,6 @@ EOF
 # --------------------------------------------------
 # Baixa Android.mk, CleanSpec.mk e aurorasetup.sh do proprio repo, depois roda o
 # aurorasetup.sh para baixar o APK mais recente.
-##################################################
 install_aurorastore() 
 {
     echo -e "${CYAN}Baixando AuroraStore...${RESET}"
