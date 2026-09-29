@@ -81,15 +81,6 @@ print_header()
     echo -e "${color}${border}${RESET}"
 }
 
-# Remove diretórios de pacotes/device tree que serão reclonados do zero.
-cleanup_repos() 
-{
-    echo -e "${YELLOW}Performing cleanup...${RESET}"
-    rm -rf .repo/local_manifests/
-    rm -rf hardware/qcom-caf/common
-    print_header "Cleanup completed"
-}
-
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
 clone_repo() 
 {
@@ -337,49 +328,24 @@ EOF
 
 #####################################
 #----------------------------------#
-# Diretório de trabalho do LOSMG
+# Script Principal
 #----------------------------------#
-#####################################
 
-# Garante que estamos dentro de $HOME/LOSMG, criando se preciso.
+# Entra em $HOME/LOSMG, criando a pasta se preciso
 setup_lineage_dir() {
     LINEAGE_DIR="LOSMG"
     TARGET_DIR="$HOME/$LINEAGE_DIR"
 
-    cd_or_exit() {
-        cd "$1" || error_exit "Failed to cd to $1"
-    }
+    [ "$PWD" = "$TARGET_DIR" ] && return
 
-    [ "$(basename "$PWD")" = "$LINEAGE_DIR" ] && {
-        print_header "Already in $LINEAGE_DIR" "=" "$GREEN"
-        return
-    }
-
-    print_header "Setting up $LINEAGE_DIR..." "=" "$CYAN"
-    
-    if [ -d "$TARGET_DIR" ]; then
-        cd_or_exit "$TARGET_DIR"
-        print_header "Changed to: $PWD" "=" "$GREEN"
-    else
-        print_header "Creating $TARGET_DIR..." "=" "$YELLOW"
-        mkdir -p "$TARGET_DIR" || error_exit "Failed to create"
-        cd_or_exit "$TARGET_DIR"
-        print_header "Created: $PWD" "=" "$GREEN"
-    fi
+    mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
+    cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
 }
 
-#####################################
-#----------------------------------#
-# Script Principal
-#----------------------------------#
-#####################################
-check_repo_valid
-setup_lineage_dir
+check_repo_valid; setup_lineage_dir
 cd "$HOME/LOSMG" || error_exit "Failed to cd to LineageOS22-MicroG"
 
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
-cleanup_repos
-
 
 # ========================================
 # Repository Initialization
