@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-#-------------------------------------------------------------------#
-# Autor       : WhoFoss <https://github.com/WhoFoss>
-# DESCRIÇÃO   :
-# Script de build automatizado para compilar o LineageOS 22.2 com MicroG
-# integrado, voltado para o Xiaomi Redmi Note 13 4G (codename: sapphire,
-# SM6225/Snapdragon 685). Cuida da limpeza de repositórios antigos, repo
-# init/sync, clone de device tree/HALs/pacotes modificados, manifest local
-# do MicroG, patches (signature spoofing, sufixo de versão), instalação de
-# apps de privacidade, remoção de GApps
-# stock, preparo do ambiente de build e upload da ROM final via GoFile.
-#-------------------------------------------------------------------#
+#####################################################################
+#                                                                   #
+# Autor: WhoFoss <https://github.com/WhoFoss>                       #
+# Créditos: Saroj (disponibilizou a device tree)                    #
+#Programa: LOSMG                                                    #
+# DESCRIÇÃO: Build automatizado do LineageOS 22.2 com MicroG para   #
+#            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
+#            Faz repo init/sync, clone de device tree/HALs/pacotes  #
+#            modificados, manifest local do MicroG, patches         #
+#            (signature spoofing, sufixo de versão), instalação de  #
+#            apps de privacidade, remoção de GApps stock, preparo   #
+#            do ambiente de build e upload da ROM via GoFile.       #
+#                                                                   #
+#####################################################################
 
-#####################################
 #----------------------------------#
 # Cores
 #----------------------------------#
