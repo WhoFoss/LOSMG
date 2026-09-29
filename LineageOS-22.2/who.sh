@@ -2,14 +2,15 @@
 #####################################################################
 #                                                                   #
 # Autor: WhoFoss <https://github.com/WhoFoss>                       #
-# Créditos: Saroj (disponibilizou a device tree)                    #
-#Programa: LOSMG                                                    #
+# Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
+# Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
+# Script: LOSMG                                                   #
 # DESCRIÇÃO: Build automatizado do LineageOS 22.2 com MicroG para   #
 #            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
 #            Faz repo init/sync, clone de device tree/HALs/pacotes  #
 #            modificados, manifest local do MicroG, patches         #
 #            (signature spoofing, sufixo de versão), instalação de  #
-#            apps de privacidade, remoção de GApps stock, preparo   #
+#            apps, remoção dos GApps, preparo                       #
 #            do ambiente de build e upload da ROM via GoFile.       #
 #                                                                   #
 #####################################################################
@@ -56,7 +57,7 @@ check_repo_valid() {
     local repo_dir="$HOME/.repo"
 
     if [ -d "$repo_dir" ]; then
-        echo "[ERROR] $repo_dir found — leftover workspace in home directory"
+        echo "[ERROR] $repo_dir found: leftover workspace in home directory"
 
         if [ ! -f "$repo_dir/manifest.xml" ] && [ ! -L "$repo_dir/manifest.xml" ]; then
             echo "[ERROR] Also, this .repo appears incomplete/corrupted (missing manifest.xml)"
