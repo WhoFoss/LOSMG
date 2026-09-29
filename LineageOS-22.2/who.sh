@@ -23,6 +23,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+B=$'\e[1m' # bold
 RESET='\033[0m'
 
 #####################################
@@ -70,7 +71,7 @@ check_repo_valid() {
 # Imprime a mensagem 
 print_header()
 {
-    echo -e "${3:-$GREEN}>>>${RESET} ${1}"
+    echo -e "${3:-$B}>>>${RESET} ${1}"
 }
 
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
