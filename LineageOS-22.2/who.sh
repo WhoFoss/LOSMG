@@ -331,7 +331,7 @@ EOF
 # Script Principal
 #----------------------------------#
 
-# Entra em $HOME/LOSMG, criando a pasta se preciso
+# Dei uma pequena melhorada nessa função. o intuito é diminuir as linhas e diminuir as funções inúteis - 29/09/2026
 setup_lineage_dir() {
     LINEAGE_DIR="LOSMG"
     TARGET_DIR="$HOME/$LINEAGE_DIR"
@@ -340,11 +340,7 @@ setup_lineage_dir() {
 
     mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
     cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
-}
-
-check_repo_valid; setup_lineage_dir
-cd "$HOME/LOSMG" || error_exit "Failed to cd to LineageOS22-MicroG"
-
+}; check_repo_valid; setup_lineage_dir
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 
 # ========================================
