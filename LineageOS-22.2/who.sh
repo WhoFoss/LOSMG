@@ -67,21 +67,10 @@ check_repo_valid() {
     fi
 }
 
-# Imprime um cabeçalho colorido com borda ao redor da mensagem.
-print_header() 
+# Imprime a mensagem 
+print_header()
 {
-    local message="$1"
-    local border_char="${2:-=}"
-    local color="${3:-$GREEN}"
-    
-    # Remove cores caso a mensagem já tenha
-    message=$(echo -e "$message" | sed 's/\x1b\[[0-9;]*m//g')
-    
-    local border=$(printf "%${#message}s" | tr " " "$border_char")
-    
-    echo -e "${color}${border}${RESET}"
-    echo -e "${color}${message}${RESET}"
-    echo -e "${color}${border}${RESET}"
+    echo -e "${3:-$GREEN}>>>${RESET} ${1}"
 }
 
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
@@ -110,8 +99,8 @@ clone_hal()
     git clone --depth 1 -b "$branch" "$url" "$path" || error_exit "Failed to clone HAL $path"
 }
 
-# Adiciona um pacote em PRODUCT_PACKAGES do device.mk, de forma idempotente.
-add_to_device_mk() 
+# Adiciona um pacote em PRODUCT_PACKAGES do device.mk
+add_to_device_mk()
 {
     local package=$1
     local device_mk="device/xiaomi/sapphire/device.mk"
@@ -123,7 +112,6 @@ add_to_device_mk()
 
     if ! grep -q "^PRODUCT_PACKAGES += $package$" "$device_mk"; then
         echo "PRODUCT_PACKAGES += $package" >> "$device_mk"
-        print_header "$package added to device.mk"
     else
         echo -e "${YELLOW}$package already exists in device.mk${RESET}"
     fi
@@ -215,7 +203,6 @@ android_app_import {
     overrides: ["Browser2", "Jelly"],
 }
 EOF
-    print_header "Titanium Browser prebuilt cloned to device/xiaomi/sapphire/prebuilt/titanium"
     add_to_device_mk "Titanium"
 }
 
