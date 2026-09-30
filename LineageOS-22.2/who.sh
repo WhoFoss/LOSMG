@@ -230,28 +230,25 @@ EOF
 # --------------------------------------------------
 # Baixa Android.mk, CleanSpec.mk e aurorasetup.sh do proprio repo, depois roda o
 # aurorasetup.sh para baixar o APK mais recente.
-install_aurorastore() 
+# Baixa os arquivos do AuroraStore e roda o aurorasetup.sh para obter o APK.
+install_aurorastore()
 {
     echo -e "${CYAN}Baixando AuroraStore...${RESET}"
 
-    rm -rf vendor/aurora && mkdir -p vendor/aurora
-
-    local BASE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/AuroraStore"
+    local BASE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/main/AuroraStore"
     local files=("Android.mk" "CleanSpec.mk" "aurorasetup.sh")
     local f
 
+    rm -rf vendor/aurora && mkdir -p vendor/aurora
+
     for f in "${files[@]}"; do
-        if ! curl -fsSL -o "vendor/aurora/$f" "$BASE_URL/$f"; then
-            echo -e "${RED}[ERRO] Falha ao baixar $f${RESET}"
-            return 1
-        fi
+        curl -fsSL -o "vendor/aurora/$f" "$BASE_URL/$f" || error_exit "Falha ao baixar $f"
     done
 
     chmod +x vendor/aurora/aurorasetup.sh
 
     echo -e "${CYAN}Rodando aurorasetup.sh (baixa o APK)...${RESET}"
-    bash vendor/aurora/aurorasetup.sh \
-        || { echo -e "${RED}[ERRO] aurorasetup.sh falhou${RESET}"; return 1; }
+    bash vendor/aurora/aurorasetup.sh || error_exit "aurorasetup.sh falhou"
 
     add_to_device_mk "AuroraStore"
 }
@@ -262,7 +259,7 @@ install_gramophone() {
     
     wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/gramophone/Gramophone.apk \
         "https://f-droid.org/repo/org.akanework.gramophone_24.apk" \
-        || { echo "[ERRO] Falha ao baixar Gramophone.apk"; return 1; }
+        || { echo "ERRO: Falha ao baixar Gramophone.apk"; return 1; }
     
     cat > device/xiaomi/sapphire/prebuilt/gramophone/Android.bp << 'EOF'
 android_app_import {
@@ -315,7 +312,6 @@ clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15
 MG-Manifest()
 {
 echo -e "${YELLOW}Baixando MicroG Manifest...${RESET}"
-
 mkdir -p .repo/local_manifests
 
 TMP_FILE=$(mktemp)
@@ -373,39 +369,23 @@ source ~/.bashrc 2>/dev/null || true
  print_header "gofile installed"
 }
 
-# Substitui device/xiaomi/sapphire/lineage_sapphire.mk por uma versao
+# Substitui o lineage_sapphire.mk do device por uma versão sem GApps.
 rgapps()
 {
-clear
     local MK_FILE="device/xiaomi/sapphire/lineage_sapphire.mk"
     local REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/sapphire.mk/lineage_sapphire.mk"
     local TMP_FILE
 
-    if [ ! -f "$MK_FILE" ]; then
-        echo "[ERRO] $MK_FILE nao encontrado"
-        return 1
-    fi
-
-    echo -e "${CYAN}Baixando lineage_sapphire.mk...${RESET}"
+    [ -f "$MK_FILE" ] || error_exit "$MK_FILE nao encontrado"
 
     TMP_FILE=$(mktemp)
 
-    if ! curl -fsSL -o "$TMP_FILE" "$REMOTE_URL"; then
-        echo "[ERRO] Falha ao baixar $REMOTE_URL"
-        rm -rf "$TMP_FILE"
-        return 1
-    fi
-
-    if [ ! -s "$TMP_FILE" ]; then
-        echo "[ERRO] Arquivo baixado esta vazio"
-        rm -rf "$TMP_FILE"
-        return 1
+    if ! curl -fsSL -o "$TMP_FILE" "$REMOTE_URL" || [ ! -s "$TMP_FILE" ]; then
+        rm -f "$TMP_FILE"
+        error_exit "Falha ao baixar $REMOTE_URL"
     fi
 
     mv -f "$TMP_FILE" "$MK_FILE"
-
-    echo "[OK] $MK_FILE substituido com sucesso"
-    print_header "GApps disable pass complete"
 }; rgapps
 
 #####################################
