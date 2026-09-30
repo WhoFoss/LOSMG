@@ -291,7 +291,7 @@ setup_lineage_dir() {
 
     mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
     cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
-}; check_repo_valid; setup_lineage_dir
+}; clear; check_repo_valid; setup_lineage_dir
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 
 # ========================================
@@ -329,14 +329,14 @@ fi
 
 mv -f "$TMP_FILE" .repo/local_manifests/microg.xml
 
-print_header "MG manifest baixado" && clear
+print_header "MG manifest baixado"
 }; MG-Manifest
 
 # ========================================
 # Repository Synchronization
 # Download and synchronize the complete source tree
 # ========================================
-echo -e "${YELLOW}Syncing full repo...${RESET}"
+clear; echo -e "${YELLOW}Syncing full repo...${RESET}"
 repo sync -c -j4 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
@@ -344,7 +344,7 @@ print_header "Repo sync success"
 # Qualcomm HALs
 # Clone the required SM6225 hardware components
 # ========================================
-echo -e "${RED}Cloning HALs for SM6225...${RESET}"
+clear; echo -e "${RED}Cloning HALs for SM6225...${RESET}"
 clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-22.2"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-22.0-caf-sm6225"
@@ -354,7 +354,7 @@ clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_display.git" "hardwa
 clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_media.git" "hardware/qcom-caf/sm6225/media" "lineage-22.0-caf-sm6225"
 clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_audio.git" "hardware/qcom-caf/sm6225/audio/primary-hal" "lineage-22.0-caf-sm6225"
 clone_hal "https://github.com/sapphire-sm6225/device_qcom_sepolicy_vndr.git" "device/qcom/sepolicy_vndr/sm6225" "lineage-22.0-caf-sm6225"
-print_header "HALs cloned" && clear
+print_header "HALs cloned"
 
 # Instala o script de upload do GoFile e cria o alias "gofile" no bashrc.
 gofile_install()
@@ -393,33 +393,31 @@ rgapps()
 # Coisas que voce não precisa saber
 #----------------------------------#
 patch_signature_spoofing
-patch_version_mk; clear
+patch_version_mk
  install_titanium
  install_thunderbird
  install_aurorastore
  install_davx5
 #install_gramophone
-gofile_install; clear
+gofile_install
 
 
 # ========================================
 # Build Environment Setup
 # ========================================
-echo -e "${RED}Setting up build environment...${RESET}"
+clear; echo -e "${RED}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=LineageOS-22.2-MicroG
 export BUILD_HOSTNAME=WhoFoss
 export SKIP_ABI_CHECKS=true
 export WITH_GMS=true
 mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
-print_header "Build environment ready"; clear
 
 # ========================================
 # Build
 # Start ROM compilation
 # ========================================
- echo -e "${YELLOW}Starting build...${RESET}"
-#
+echo -e "${YELLOW}Starting build...${RESET}"
 brunch sapphire user || error_exit "Brunch failed"
 
 # ========================================
