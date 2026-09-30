@@ -4,8 +4,9 @@
 # Autor: WhoFoss <https://github.com/WhoFoss>                       #
 # Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
 # Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
-# Script: LOSMG                                                     #
-# DESCRIÇÃO: Build automatizado do LineageOS 22.2 com MicroG para   #
+# Créditos: Sem nome - (Por me ensinar a remover apps)              #
+#                                                                   #
+# DESCRIÇÃO: script automatizado do LineageOS 22.2 com MicroG para  #
 #            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
 #            Faz repo init/sync, clone de device tree/HALs/pacotes  #
 #            modificados, manifest local do MicroG, patches         #
