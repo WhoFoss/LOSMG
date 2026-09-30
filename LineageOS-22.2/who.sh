@@ -206,7 +206,7 @@ EOF
 # Baixa o APK do Thunderbird e gera o Android.bp para importação prebuilt.
 install_thunderbird() 
 {
-    echo -e "${YELLOW}Cloning Thunderbird prebuilt...${RESET}"
+    echo -e "${CYAN}Cloning Thunderbird prebuilt...${RESET}"
     mkdir -p device/xiaomi/sapphire/prebuilt/thunderbird
     wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/thunderbird/Thunderbird.apk \
         "https://f-droid.org/repo/net.thunderbird.android_23.apk" \
@@ -299,7 +299,7 @@ echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 # Repository Initialization
 # Initialize the LineageOS source repository
 # ========================================
-echo -e "${YELLOW}Initializing repo...${RESET}"
+echo -e "${CYAN}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
 
@@ -312,7 +312,7 @@ clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15
 # ========================================
 MG-Manifest()
 {
-echo -e "${YELLOW}Baixando MicroG Manifest...${RESET}"
+echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
 mkdir -p .repo/local_manifests
 
 TMP_FILE=$(mktemp)
@@ -337,7 +337,7 @@ print_header "MG manifest baixado"
 # Repository Synchronization
 # Download and synchronize the complete source tree
 # ========================================
-clear; echo -e "${YELLOW}Syncing full repo...${RESET}"
+clear; echo -e "${CYAN}Syncing full repo...${RESET}"
 repo sync -c -j4 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
@@ -345,7 +345,7 @@ print_header "Repo sync success"
 # Qualcomm HALs
 # Clone the required SM6225 hardware components
 # ========================================
-clear; echo -e "${RED}Cloning HALs for SM6225...${RESET}"
+clear; echo -e "${CYAN}Cloning HALs for SM6225...${RESET}"
 clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-22.2"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-22.0-caf-sm6225"
@@ -360,7 +360,7 @@ print_header "HALs cloned"
 # Instala o script de upload do GoFile e cria o alias "gofile" no bashrc.
 gofile_install()
 {
-echo -e "${YELLOW}Installing gofile upload tool...${RESET}"
+echo -e "${CYAN}Installing gofile upload tool...${RESET}"
 wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
     -O ~/LOSMG/gofile && chmod +x ~/LOSMG/gofile
 if ! grep -q 'alias gofile' ~/.bashrc; then
@@ -406,7 +406,7 @@ gofile_install
 # ========================================
 # Build Environment Setup
 # ========================================
-clear; echo -e "${RED}Setting up build environment...${RESET}"
+clear; echo -e "${CYAN}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=LineageOS-22.2-MicroG
 export BUILD_HOSTNAME=WhoFoss
@@ -418,7 +418,7 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 # Build
 # Start ROM compilation
 # ========================================
-echo -e "${YELLOW}Starting build...${RESET}"
+echo -e "${CYAN}Starting build...${RESET}"
 clear; brunch sapphire user || error_exit "Brunch failed"
 
 # ========================================
@@ -436,7 +436,7 @@ upload(){
     ROM_SIZE=""
 
     if [ ! -d "$BUILD_DIR" ]; then
-        echo -e "${RED}[ERROR] Build directory not found: $BUILD_DIR${RESET}"
+        echo -e "${RED}ERROR: Build directory not found: $BUILD_DIR${RESET}"
         return 1
     fi
 
