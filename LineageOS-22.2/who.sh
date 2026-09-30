@@ -101,53 +101,31 @@ add_to_device_mk()
     local package=$1
     local device_mk="device/xiaomi/sapphire/device.mk"
 
-    if [ ! -f "$device_mk" ]; then
-        echo -e "${YELLOW}device.mk not found, skipping $package addition${RESET}"
-        return
-    fi
+    [ -f "$device_mk" ] || error_exit "device.mk not found: $device_mk"
+    grep -qxF "PRODUCT_PACKAGES += $package" "$device_mk" && return
 
-    if ! grep -q "^PRODUCT_PACKAGES += $package$" "$device_mk"; then
-        echo "PRODUCT_PACKAGES += $package" >> "$device_mk"
-    else
-        echo -e "${YELLOW}$package already exists in device.mk${RESET}"
-    fi
+    echo "PRODUCT_PACKAGES += $package" >> "$device_mk"
 }
 
-# Aplica o patch de Signature Spoofing em ComputerEngine.java (com backup).
+# Aplica o patch de Signature Spoofing em ComputerEngine.java.
 patch_signature_spoofing() {
     local COMPUTER_ENGINE="frameworks/base/services/core/java/com/android/server/pm/ComputerEngine.java"
 
-    if [ ! -f "$COMPUTER_ENGINE" ]; then
-        echo -e "${YELLOW}ComputerEngine.java not found, skipping patch${RESET}"
-        return
-    fi
+    [ -f "$COMPUTER_ENGINE" ] || error_exit "ComputerEngine.java not found: $COMPUTER_ENGINE"
+    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" || error_exit "Signature Spoofing: isDebuggable() block not found"
 
-    cp "$COMPUTER_ENGINE" "${COMPUTER_ENGINE}.backup"
+    sed -i '/if (!isDebuggable()) {/{N;N;d}' "$COMPUTER_ENGINE"
 
-    if grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE"; then
-        sed -i '/if (!isDebuggable()) {/{N;N;d}' "$COMPUTER_ENGINE"
-        print_header "Signature Spoofing patch applied"
-    else
-        echo -e "${YELLOW}Signature Spoofing patch: block not found or already patched${RESET}"
-    fi
+    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" && error_exit "Signature Spoofing patch failed"
 }
 
-# Adiciona sufixo -MicroG/-BUILD_TAG ao version.mk do vendor/lineage.
-patch_version_mk() 
+# Adiciona sufixo -MicroG
+patch_version_mk()
 {
     local version_mk="vendor/lineage/config/version.mk"
 
-    if [ ! -f "$version_mk" ]; then
-        echo -e "${YELLOW}version.mk not found, skipping MicroG suffix patch${RESET}"
-        return
-    fi
-
-    cp "$version_mk" "${version_mk}.backup"
-
-    if grep -q "MicroG" "$version_mk"; then
-        echo -e "${YELLOW}MicroG suffix already patched${RESET}"
-        return
-    fi
+    [ -f "$version_mk" ] || error_exit "version.mk not found: $version_mk"
+    grep -q "MicroG" "$version_mk" && return
 
     sed -i '/^LINEAGE_VERSION_SUFFIX := .*/a \
 \
@@ -161,11 +139,7 @@ ifneq ($(BUILD_TAG),)\
     LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)\
 endif' "$version_mk"
 
-    if grep -q "MicroG" "$version_mk"; then
-        print_header "MicroG suffix patch applied successfully"
-    else
-        echo -e "${YELLOW}Warning: MicroG suffix patch may not have been applied${RESET}"
-    fi
+    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
 }
 
 ##################################################
@@ -184,7 +158,7 @@ install_titanium() {
     mkdir -p device/xiaomi/sapphire/prebuilt/titanium
     wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/titanium/Titanium.apk \
         "https://github.com/jqssun/android-titanium-browser/releases/download/v152.0.7977.42/152.0.7977.42-1786928933-arm64-v8a.apk" \
-        || { echo "[ERRO] Falha ao baixar Titanium.apk"; return 1; }
+        || { echo "ERRO: Falha ao baixar Titanium.apk"; return 1; }
 
     cat > device/xiaomi/sapphire/prebuilt/titanium/Android.bp << 'EOF'
 android_app_import {
@@ -211,7 +185,7 @@ install_davx5()
 
     wget -q --show-progress -O "$target_dir/DAVx5.apk" \
         "https://f-droid.org/repo/at.bitfire.davdroid_405190003.apk" \
-        || { echo "[ERRO] Falha ao baixar DAVx5.apk"; return 1; }
+        || { echo "ERRO: Falha ao baixar DAVx5.apk"; return 1; }
 
     cat > "$target_dir/Android.bp" << 'EOF'
 android_app_import {
@@ -225,7 +199,6 @@ android_app_import {
     },
 }
 EOF
-    print_header "DAVx5 prebuilt baixado para $target_dir"
     add_to_device_mk "DAVx5"
 }
 
@@ -249,7 +222,6 @@ android_app_import {
     },
 }
 EOF
-    print_header "Thunderbird prebuilt cloned to device/xiaomi/sapphire/prebuilt/thunderbird"
     add_to_device_mk "Thunderbird"
 }
 
@@ -281,7 +253,6 @@ install_aurorastore()
     bash vendor/aurora/aurorasetup.sh \
         || { echo -e "${RED}[ERRO] aurorasetup.sh falhou${RESET}"; return 1; }
 
-    print_header "AuroraStore pronto"
     add_to_device_mk "AuroraStore"
 }
 
@@ -306,8 +277,6 @@ android_app_import {
     overrides: ["Twelve"],
 }
 EOF
-    
-    print_header "Gramophone prebuilt cloned to device/xiaomi/sapphire/prebuilt/gramophone"
     add_to_device_mk "Gramophone"
 }
 
