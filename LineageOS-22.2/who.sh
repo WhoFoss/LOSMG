@@ -140,7 +140,7 @@ ifneq ($(BUILD_TAG),)\
     LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)\
 endif' "$version_mk"
 
-    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
+   grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
 }
 
 ##################################################
