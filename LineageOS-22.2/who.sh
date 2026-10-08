@@ -143,26 +143,34 @@ endif' "$version_mk"
    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
 }
 
-##################################################
-# IronFox Browser Prebuilt
-# --------------------------------------------------
-# Base: Firefox (Mozilla)
-# Fork: https://gitlab.com/ironfox-oss/IronFox
-# SITE:  https://ironfoxoss.org/releases/
-# Versão: 157.0.1
-# Licença: MPL-2.0
-# --------------------------------------------------
-# Baixa APK e gera Android.bp para importação prebuilt
-# Substitui: Browser2, Jelly
-##################################################
-install_ironfox() {
-    echo -e "${CYAN}Cloning IronFox prebuilt...${RESET}"
-    mkdir -p device/xiaomi/sapphire/prebuilt/ironfox
-    wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/ironfox/IronFox.apk \
-        "https://releases.ironfoxoss.org/ironfox/releases/157.0.1/arm64-v8a/ironfox-157.0.1-arm64-v8a.apk" \
-        || { echo "ERRO: Falha ao baixar IronFox.apk"; return 1; }
+#####################################################################
+# Autor: WhoFoss
+# Programa: IronFox Browser Prebuilt
+# DESCRIÇÃO: Baixa o APK do IronFox (fork do Firefox) e gera o
+#            Android.bp para importação prebuilt. Substitui Browser2 e Jelly.
+# Dependências: wget, add_to_device_mk
+# Recursos: Versão 157.0.1 | Licença MPL-2.0
+#           https://gitlab.com/ironfox-oss/IronFox
+#           https://ironfoxoss.org/releases/
+#####################################################################
 
-    cat > device/xiaomi/sapphire/prebuilt/ironfox/Android.bp << 'EOF'
+#--------------------------------------------------------------------#
+# IRONFOX
+#--------------------------------------------------------------------#
+
+# Baixa o APK do IronFox, gera o Android.bp e registra no device.mk
+install_ironfox() {
+    local versao="157.0.1"
+    local dir="device/xiaomi/sapphire/prebuilt/ironfox"
+    local url="https://releases.ironfoxoss.org/ironfox/releases/${versao}/arm64-v8a/ironfox-${versao}-arm64-v8a.apk"
+
+    echo "$(tput setaf 6)$(tput bold)Baixando IronFox ${versao}...$(tput sgr0)"
+    mkdir -p "${dir}" \
+        && wget -q --show-progress -O "${dir}/IronFox.apk.tmp" "${url}" \
+        && mv "${dir}/IronFox.apk.tmp" "${dir}/IronFox.apk" \
+        || { rm -f "${dir}/IronFox.apk.tmp"; echo "$(tput setaf 1)Falha ao baixar o IronFox.apk$(tput sgr0)"; return 1; }
+
+    cat > "${dir}/Android.bp" << 'EOF'
 android_app_import {
     name: "IronFox",
     apk: "IronFox.apk",
