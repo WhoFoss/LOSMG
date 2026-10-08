@@ -144,27 +144,28 @@ endif' "$version_mk"
 }
 
 ##################################################
-# Titanium Browser Prebuilt
+# IronFox Browser Prebuilt
 # --------------------------------------------------
-# Base: Vanadium (GrapheneOS)
-# Fork: https://github.com/jqssun/android-titanium-browser
-# Versão: v152.0.7977.42
-# Licença: GPL-2.0
+# Base: Firefox (Mozilla)
+# Fork: https://gitlab.com/ironfox-oss/IronFox
+# SITE:  https://ironfoxoss.org/releases/
+# Versão: 157.0.1
+# Licença: MPL-2.0
 # --------------------------------------------------
 # Baixa APK e gera Android.bp para importação prebuilt
 # Substitui: Browser2, Jelly
 ##################################################
-install_titanium() {
-    echo -e "${CYAN}Cloning Titanium Browser prebuilt...${RESET}"
-    mkdir -p device/xiaomi/sapphire/prebuilt/titanium
-    wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/titanium/Titanium.apk \
-        "https://github.com/jqssun/android-titanium-browser/releases/download/v152.0.7977.42/152.0.7977.42-1786928933-arm64-v8a.apk" \
-        || { echo "ERRO: Falha ao baixar Titanium.apk"; return 1; }
+install_ironfox() {
+    echo -e "${CYAN}Cloning IronFox prebuilt...${RESET}"
+    mkdir -p device/xiaomi/sapphire/prebuilt/ironfox
+    wget -q --show-progress -O device/xiaomi/sapphire/prebuilt/ironfox/IronFox.apk \
+        "https://releases.ironfoxoss.org/ironfox/releases/157.0.1/arm64-v8a/ironfox-157.0.1-arm64-v8a.apk" \
+        || { echo "ERRO: Falha ao baixar IronFox.apk"; return 1; }
 
-    cat > device/xiaomi/sapphire/prebuilt/titanium/Android.bp << 'EOF'
+    cat > device/xiaomi/sapphire/prebuilt/ironfox/Android.bp << 'EOF'
 android_app_import {
-    name: "Titanium",
-    apk: "Titanium.apk",
+    name: "IronFox",
+    apk: "IronFox.apk",
     presigned: true,
     preprocessed: true,
     product_specific: true,
@@ -174,7 +175,7 @@ android_app_import {
     overrides: ["Browser2", "Jelly"],
 }
 EOF
-    add_to_device_mk "Titanium"
+    add_to_device_mk "IronFox"
 }
 
 install_davx5() 
@@ -395,10 +396,10 @@ rgapps()
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-# install_titanium
+install_ironfox
 # install_thunderbird
 # install_aurorastore
-# install_davx5
+install_davx5
 #install_gramophone
 gofile_install
 
