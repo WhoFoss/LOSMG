@@ -176,14 +176,12 @@ android_app_import {
     apk: "IronFox.apk",
     presigned: true,
     preprocessed: true,
+    skip_preprocessed_apk_checks: true,
     product_specific: true,
     dex_preopt: {
         enabled: false,
     },
     overrides: ["Browser2", "Jelly"],
-}
-EOF
-    add_to_device_mk "IronFox"
 }
 
 install_davx5() 
