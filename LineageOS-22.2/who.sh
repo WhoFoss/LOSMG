@@ -53,15 +53,13 @@ error_exit() {
 check_repo_valid() {
     local repo_dir="$HOME/.repo"
 
-    if [ -d "$repo_dir" ]; then
-        echo "[ERROR] $repo_dir found: leftover workspace in home directory"
+    [ -d "$repo_dir" ] || return 0
 
-        if [ ! -f "$repo_dir/manifest.xml" ] && [ ! -L "$repo_dir/manifest.xml" ]; then
-            echo "[ERROR] Also, this .repo appears incomplete/corrupted (missing manifest.xml)"
-        fi
+    echo "[ERROR] $repo_dir found: leftover workspace in home directory"
+    { [ ! -f "$repo_dir/manifest.xml" ] && [ ! -L "$repo_dir/manifest.xml" ]; } \
+        && echo "[ERROR] Also, this .repo appears incomplete/corrupted (missing manifest.xml)"
 
-        error_exit "Remove or move $repo_dir before continuing (rm -rf $repo_dir)"
-    fi
+    error_exit "Remove or move $repo_dir before continuing (rm -rf $repo_dir)"
 }
 
 # Imprime a mensagem - 29/09/2026
