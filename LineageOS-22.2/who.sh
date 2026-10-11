@@ -321,28 +321,22 @@ clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15
 # MG Manifest
 # Baixa o manifest do MicroG do repositorio remoto
 # ========================================
-MG-Manifest()
-{
-echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
-mkdir -p .repo/local_manifests
+mg_manifest() {
+    echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
+    mkdir -p .repo/local_manifests
 
-TMP_FILE=$(mktemp)
-REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/MG-MANIFEST/microg.xml"
+    local tmp_file remote_url
+    tmp_file=$(mktemp)
+    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/MG-MANIFEST/microg.xml"
 
-if ! curl -fsSL -o "$TMP_FILE" "$REMOTE_URL"; then
-    rm -f "$TMP_FILE"
-    error_exit "Falha ao baixar $REMOTE_URL"
-fi
+    if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
+        rm -f "$tmp_file"
+        error_exit "Falha ao baixar $remote_url (ou arquivo vazio)"
+    fi
 
-if [ ! -s "$TMP_FILE" ]; then
-    rm -f "$TMP_FILE"
-    error_exit "Arquivo vazio"
-fi
-
-mv -f "$TMP_FILE" .repo/local_manifests/microg.xml
-
-print_header "MG manifest baixado"
-}; MG-Manifest
+    mv -f "$tmp_file" .repo/local_manifests/microg.xml
+    print_header "MG manifest baixado"
+}; mg_manifest
 
 # ========================================
 # Repository Synchronization
