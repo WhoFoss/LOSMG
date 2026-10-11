@@ -428,19 +428,14 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 echo -e "${CYAN}Starting build...${RESET}"
 clear; brunch sapphire user || error_exit "Brunch failed"
 
-# ========================================
-# ROM Upload to GoFile
-# Find, checksum, and upload the latest ROM
-# ========================================
-# Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile
-# (usando o script local se existir)
-# ========================================
+# Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 upload(){
     BUILD_DIR="out/target/product/sapphire"
     GOFILE_SCRIPT="${HOME}/LOSMG/gofile"
     ROM_URL=""
 
     [ -d "$BUILD_DIR" ] || { echo -e "${RED}ERROR: Build directory not found: $BUILD_DIR${RESET}"; return 1; }
+    [ -x "$GOFILE_SCRIPT" ] || { echo -e "${RED}ERROR: GoFile script not found or not executable: $GOFILE_SCRIPT${RESET}"; return 1; }
 
     # Pega a ROM mais recente (por data de modificação)
     ROM_PATH=$(ls -t "$BUILD_DIR"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
@@ -452,16 +447,7 @@ upload(){
     ROM_SHA256=$(sha256sum "$ROM_PATH" | cut -d' ' -f1)
     echo "$ROM_SHA256  $ROM_NAME" > "${ROM_PATH}.sha256"
 
-    # Usa o script local; se não existir, baixa o fallback
-    if [ -x "$GOFILE_SCRIPT" ]; then
-        ROM_OUTPUT=$("$GOFILE_SCRIPT" "$ROM_PATH" 2>&1); UPLOAD_EXIT=$?
-    else
-        TMP_SCRIPT=$(mktemp)
-        curl -fsSL -o "$TMP_SCRIPT" "https://raw.githubusercontent.com/saroj-nokia/GoFile-Upload/refs/heads/master/upload.sh" \
-            && { ROM_OUTPUT=$(bash "$TMP_SCRIPT" "$ROM_PATH" 2>&1); UPLOAD_EXIT=$?; } \
-            || { ROM_OUTPUT="Failed to download fallback script"; UPLOAD_EXIT=1; }
-        rm -f "$TMP_SCRIPT"
-    fi
+    ROM_OUTPUT=$("$GOFILE_SCRIPT" "$ROM_PATH" 2>&1); UPLOAD_EXIT=$?
 
     if [ "$UPLOAD_EXIT" -eq 0 ]; then
         ROM_URL=$(grep -oP 'https?://[^\s]+' <<< "$ROM_OUTPUT" | head -n1)
