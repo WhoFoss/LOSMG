@@ -183,6 +183,12 @@ android_app_import {
     },
     overrides: ["Browser2", "Jelly"],
 }
+EOF
+
+    add_to_device_mk "IronFox"
+    print_header "IronFox instalado"
+}
+
 
 install_davx5() 
 {
