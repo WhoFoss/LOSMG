@@ -427,37 +427,51 @@ echo -e "${CYAN}Starting build...${RESET}"
 clear; brunch sapphire user || error_exit "Brunch failed"
 
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
-upload(){
-    BUILD_DIR="out/target/product/sapphire"
-    GOFILE_SCRIPT="${HOME}/LOSMG/gofile"
-    ROM_URL=""
+upload() {
+    local build_dir="out/target/product/sapphire"
+    local gofile_script="${HOME}/LOSMG/gofile"
+    local rom_path boot_path rom_name rom_size rom_sha256
+    local boot_sha256 rom_output boot_output rom_url boot_url
 
-    [ -d "$BUILD_DIR" ] || { echo -e "${RED}ERROR: Build directory not found: $BUILD_DIR${RESET}"; return 1; }
-    [ -x "$GOFILE_SCRIPT" ] || { echo -e "${RED}ERROR: GoFile script not found or not executable: $GOFILE_SCRIPT${RESET}"; return 1; }
+    [ -d "$build_dir" ]     || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
+    [ -x "$gofile_script" ] || { echo -e "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
 
-    # Pega a ROM mais recente (por data de modificação)
-    ROM_PATH=$(ls -t "$BUILD_DIR"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
-    ROM_NAME=${ROM_PATH##*/}
+    ### Localiza os arquivos 
+    rom_path=$(ls -t "$build_dir"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
+    boot_path="$build_dir/init_boot.img"
 
-    [ -z "$ROM_PATH" ] && { echo -e "${YELLOW}ROM not found in $BUILD_DIR\nUpload skipped${RESET}"; return 1; }
+    [ -z "$rom_path" ]     && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
+    [ -f "$boot_path" ]    || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
 
-    ROM_SIZE=$(du -h "$ROM_PATH" | cut -f1)
-    ROM_SHA256=$(sha256sum "$ROM_PATH" | cut -d' ' -f1)
-    echo "$ROM_SHA256  $ROM_NAME" > "${ROM_PATH}.sha256"
+    ### Metadados da ROM
+    rom_name=${rom_path##*/}
+    rom_size=$(du -h "$rom_path" | cut -f1)
+    rom_sha256=$(sha256sum "$rom_path" | cut -d' ' -f1)
+    echo "$rom_sha256 $rom_name" > "${rom_path}.sha256"
 
-    ROM_OUTPUT=$("$GOFILE_SCRIPT" "$ROM_PATH" 2>&1); UPLOAD_EXIT=$?
+    ### Metadados do init_boot 
+    boot_sha256=$(sha256sum "$boot_path" | cut -d' ' -f1)
+    echo "$boot_sha256 init_boot.img" > "${boot_path}.sha256"
 
-    if [ "$UPLOAD_EXIT" -eq 0 ]; then
-        ROM_URL=$(grep -oP 'https?://[^\s]+' <<< "$ROM_OUTPUT" | head -n1)
-        [ -z "$ROM_URL" ] && echo -e "${YELLOW}Warning: upload completed but the URL could not be extracted\nOutput: $ROM_OUTPUT${RESET}"
-    else
-        echo -e "${RED}Failed to upload ROM to GoFile. Code: $UPLOAD_EXIT\n$ROM_OUTPUT${RESET}"
-    fi
+    #### Upload ROM
+    rom_output=$("$gofile_script" "$rom_path" 2>&1) \
+        || { echo -e "${RED}Upload da ROM falhou:\n$rom_output${RESET}"; return 1; }
+    rom_url=$(grep -oP 'https?://[^\s]+' <<< "$rom_output" | head -n1)
 
+    #### Upload init_boot 
+    boot_output=$("$gofile_script" "$boot_path" 2>&1) \
+        || { echo -e "${RED}Upload do init_boot falhou:\n$boot_output${RESET}"; return 1; }
+    boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
+
+    #### Resumo
     print_header "Upload complete"
-    echo -e "${CYAN}ROM:${RESET}${ROM_NAME}\n${CYAN}Size:${RESET}${ROM_SIZE}"
-    [ -n "$ROM_URL" ] && echo -e "${CYAN}Link:${RESET}$ROM_URL"
-    echo -e "${CYAN}SHA256:${RESET}${ROM_SHA256}"
+    echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
+    [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
+    echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
+    echo
+    echo -e "${CYAN}Boot:${RESET} init_boot.img"
+    [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
+    echo -e "${CYAN}SHA256 Boot:${RESET} $boot_sha256"
 
-    [ -n "$ROM_URL" ]
+    [ -n "$rom_url" ] && [ -n "$boot_url" ]
 }; upload
