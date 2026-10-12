@@ -400,11 +400,11 @@ rgapps()
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-install_ironfox
+# install_ironfox
 # install_thunderbird
 # install_aurorastore
-install_davx5
-#install_gramophone
+# install_davx5
+# install_gramophone
 gofile_install
 
 
