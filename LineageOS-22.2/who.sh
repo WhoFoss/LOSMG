@@ -464,14 +464,13 @@ upload() {
     boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
 
     #### Resumo
-    print_header "Upload complete"
     echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
     [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
     echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
     echo
-    echo -e "${CYAN}Boot:${RESET} init_boot.img"
+    echo -e "${CYAN}init_boot:${RESET} init_boot.img"
     [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
-    echo -e "${CYAN}SHA256 Boot:${RESET} $boot_sha256"
+    echo -e "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
 
     [ -n "$rom_url" ] && [ -n "$boot_url" ]
 }; upload
