@@ -467,7 +467,7 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 # Start ROM compilation
 # ========================================
 echo -e "${CYAN}Starting build...${RESET}"
-# clear; brunch sapphire user || error_exit "Brunch failed"
+ clear; brunch sapphire user || error_exit "Brunch failed"
 
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 upload() {
