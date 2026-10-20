@@ -296,10 +296,11 @@ EOF
 remove_apps() {
     local apps=(StorageManager)
     local dir="device/xiaomi/sapphire/RemoveApps"
+    local device_mk="device/xiaomi/sapphire/device.mk"
     local lista="" i
 
     for ((i = 0; i < ${#apps[@]}; i++)); do
-        lista+="${apps[i]}"
+        lista+="    ${apps[i]}"
         ((i < ${#apps[@]} - 1)) && lista+=" \\"$'\n'
     done
 
@@ -320,7 +321,13 @@ LOCAL_SRC_FILES := /dev/null
 include \$(BUILD_PREBUILT)
 EOF
 
-    add_to_device_mk "RemovePackages"
+    [ -f "${device_mk}" ] || error_exit "device.mk not found: ${device_mk}"
+    grep -q '^# Bluetooth$' "${device_mk}" || error_exit "Marcador '# Bluetooth' não encontrado em ${device_mk}"
+
+    sed -i '/^PRODUCT_PACKAGES += RemovePackages$/{N;/\n$/d}' "${device_mk}" \
+        && sed -i '/^PRODUCT_PACKAGES += RemovePackages$/d' "${device_mk}" \
+        && sed -i '0,/^# Bluetooth$/s/^# Bluetooth$/PRODUCT_PACKAGES += RemovePackages\n\n# Bluetooth/' "${device_mk}"
+
     print_header "Apps removidos: ${apps[*]}"
 }
 
