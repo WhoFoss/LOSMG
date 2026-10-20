@@ -469,15 +469,15 @@ upload() {
     local rom_path boot_path rom_name rom_size rom_sha256
     local boot_sha256 rom_output boot_output rom_url boot_url
 
-    [ -d "$build_dir" ]     || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
+    [ -d "$build_dir" ] || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
     [ -x "$gofile_script" ] || { echo -e "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
 
     ### Localiza os arquivos 
     rom_path=$(ls -t "$build_dir"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
     boot_path="$build_dir/init_boot.img"
 
-    [ -z "$rom_path" ]     && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
-    [ -f "$boot_path" ]    || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
+    [ -z "$rom_path" ] && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
+    [ -f "$boot_path" ] || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
 
     ### Metadados da ROM
     rom_name=${rom_path##*/}
