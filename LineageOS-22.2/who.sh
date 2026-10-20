@@ -289,6 +289,41 @@ EOF
     add_to_device_mk "Gramophone"
 }
 
+#--------------------------------------------------------------------#
+# REMOVEAPPS
+#--------------------------------------------------------------------#
+# Gera o módulo RemovePackages com a lista de apps a remover e registra no device.mk
+remove_apps() {
+    local apps=(StorageManager)
+    local dir="device/xiaomi/sapphire/RemoveApps"
+    local lista="" i
+
+    for ((i = 0; i < ${#apps[@]}; i++)); do
+        lista+="${apps[i]}"
+        ((i < ${#apps[@]} - 1)) && lista+=" \\"$'\n'
+    done
+
+    echo "$(tput setaf 6)$(tput bold)Gerando módulo RemovePackages...$(tput sgr0)"
+    mkdir -p "${dir}" \
+        && cat > "${dir}/Android.mk" << EOF
+LOCAL_PATH := \$(call my-dir)
+
+include \$(CLEAR_VARS)
+LOCAL_MODULE := RemovePackages
+LOCAL_MODULE_CLASS := APPS
+LOCAL_MODULE_TAGS := optional
+LOCAL_OVERRIDES_PACKAGES := \\
+${lista}
+LOCAL_UNINSTALLABLE_MODULE := true
+LOCAL_CERTIFICATE := PRESIGNED
+LOCAL_SRC_FILES := /dev/null
+include \$(BUILD_PREBUILT)
+EOF
+
+    add_to_device_mk "RemovePackages"
+    print_header "Apps removidos: ${apps[*]}"
+}; remove_apps
+
 #####################################
 #----------------------------------#
 # Script Principal
