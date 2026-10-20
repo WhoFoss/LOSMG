@@ -322,7 +322,7 @@ EOF
 
     add_to_device_mk "RemovePackages"
     print_header "Apps removidos: ${apps[*]}"
-}; remove_apps
+}
 
 #####################################
 #----------------------------------#
@@ -435,11 +435,12 @@ rgapps()
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-# install_ironfox
+install_ironfox
 # install_thunderbird
 # install_aurorastore
-# install_davx5
+install_davx5
 # install_gramophone
+remove_apps
 gofile_install
 
 
