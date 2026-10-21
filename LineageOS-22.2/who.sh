@@ -12,8 +12,7 @@
 #            modificados, manifest local do MicroG, patches         #
 #            (signature spoofing, sufixo de versão), instalação de  #
 #            apps, remoção dos GApps, preparo                       #
-#            do ambiente de build e upload da ROM via GoFile.       #
-#                                                                   #
+#            do ambiente de build e upload da ROM via GoFile.       #                                                             #
 #####################################################################
 
 #----------------------------------#
