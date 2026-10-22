@@ -140,37 +140,22 @@ endif' "$version_mk"
    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
 }
 
-#####################################################################
-# Autor: WhoFoss
-# Programa: IronFox Browser Prebuilt
-# DESCRIÇÃO: Baixa o APK do IronFox (fork do Firefox) e gera o
-#            Android.bp para importação prebuilt. Substitui Browser2 e Jelly.
-# Dependências: wget, add_to_device_mk
-# Recursos: Versão 157.0.1 | Licença MPL-2.0
-#           https://gitlab.com/ironfox-oss/IronFox
-#           https://ironfoxoss.org/releases/
-#####################################################################
+# Baixa o APK do Titanium e gera o Android.bp para importação prebuilt.
+install_titanium() {
+    local versao="152.0.7977.42"
+    local dir="device/xiaomi/sapphire/prebuilt/titanium"
+    local url="https://github.com/jqssun/android-titanium-browser/releases/download/v${versao}/${versao}-1786928933-arm64-v8a.apk"
 
-#--------------------------------------------------------------------#
-# IRONFOX
-#--------------------------------------------------------------------#
-
-# Baixa o APK do IronFox, gera o Android.bp e registra no device.mk
-install_ironfox() {
-    local versao="157.0.1"
-    local dir="device/xiaomi/sapphire/prebuilt/ironfox"
-    local url="https://releases.ironfoxoss.org/ironfox/releases/${versao}/arm64-v8a/ironfox-${versao}-arm64-v8a.apk"
-
-    echo "$(tput setaf 6)$(tput bold)Baixando IronFox ${versao}...$(tput sgr0)"
+    echo "$(tput setaf 6)$(tput bold)Baixando Titanium ${versao}...$(tput sgr0)"
     mkdir -p "${dir}" \
-        && wget -q --show-progress -O "${dir}/IronFox.apk.tmp" "${url}" \
-        && mv "${dir}/IronFox.apk.tmp" "${dir}/IronFox.apk" \
-        || { rm -f "${dir}/IronFox.apk.tmp"; echo "$(tput setaf 1)Falha ao baixar o IronFox.apk$(tput sgr0)"; return 1; }
+        && wget -q --show-progress -O "${dir}/Titanium.apk.tmp" "${url}" \
+        && mv "${dir}/Titanium.apk.tmp" "${dir}/Titanium.apk" \
+        || { rm -f "${dir}/Titanium.apk.tmp"; echo "$(tput setaf 1)Falha ao baixar Titanium.apk$(tput sgr0)"; return 1; }
 
     cat > "${dir}/Android.bp" << 'EOF'
 android_app_import {
-    name: "IronFox",
-    apk: "IronFox.apk",
+    name: "Titanium",
+    apk: "Titanium.apk",
     presigned: true,
     preprocessed: true,
     skip_preprocessed_apk_checks: true,
@@ -181,11 +166,8 @@ android_app_import {
     overrides: ["Browser2", "Jelly"],
 }
 EOF
-
-    add_to_device_mk "IronFox"
-    print_header "IronFox instalado"
+    add_to_device_mk "Titanium"
 }
-
 
 install_davx5() 
 {
@@ -441,7 +423,7 @@ rgapps()
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-install_ironfox
+install_titanium
 #install_thunderbird
 #install_aurorastore
 install_davx5
