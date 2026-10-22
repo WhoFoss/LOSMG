@@ -423,10 +423,10 @@ rgapps()
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-install_titanium
+#install_titanium
 #install_thunderbird
 #install_aurorastore
-install_davx5
+#install_davx5
 # install_gramophone
 remove_apps
 gofile_install
