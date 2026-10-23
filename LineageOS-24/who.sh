@@ -238,25 +238,6 @@ source ~/.bashrc 2>/dev/null || true
  print_header "gofile installed"
 }
 
-# Substitui o lineage_sapphire.mk do device por uma versão sem GApps.
-rgapps()
-{
-    local MK_FILE="device/xiaomi/sapphire/lineage_sapphire.mk"
-    local REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG-24/refs/heads/main/sapphire.mk/lineage_sapphire.mk"
-    local TMP_FILE
-
-    [ -f "$MK_FILE" ] || error_exit "$MK_FILE nao encontrado"
-
-    TMP_FILE=$(mktemp)
-
-    if ! curl -fsSL -o "$TMP_FILE" "$REMOTE_URL" || [ ! -s "$TMP_FILE" ]; then
-        rm -f "$TMP_FILE"
-        error_exit "Falha ao baixar $REMOTE_URL"
-    fi
-
-    mv -f "$TMP_FILE" "$MK_FILE"
-}; rgapps
-
 #----------------------------------#
 # Coisas que voce não precisa saber
 #----------------------------------#
