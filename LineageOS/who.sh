@@ -6,7 +6,8 @@
 # Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
 # Créditos: Sem nome - (Por me ensinar a remover apps)              #
 #                                                                   #
-# DESCRIÇÃO: script automatizado do LineageOS 22.2 com MicroG para  #
+# DESCRIÇÃO:                                                        #
+# script automatizado do LineageOS 22.2 com MicroG para             #
 #            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
 #            Faz repo init/sync, clone de device tree/HALs/pacotes  #
 #            modificados, manifest local do MicroG, patches         #
@@ -15,9 +16,9 @@
 #            do ambiente de build e upload da ROM via GoFile.       #                                                             #
 #####################################################################
 
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 # Cores
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -25,19 +26,18 @@ CYAN='\033[0;36m'
 B=$'\e[1m' # bold
 RESET='\033[0m'
 
-#####################################
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 # Setup do Terminal
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 echo -en "\033[?25l"  # esconde o cursor
 trap 'echo -en "\033[?12l\033[?25h"' EXIT  # restaura ao sair
 
-#####################################
-#----------------------------------#
-# Funções Auxiliares
-#----------------------------------#
 
+#------------------------------------------------------------------------------------------------#
+# Funções Auxiliares
+#------------------------------------------------------------------------------------------------#
 # Imprime mensagem de erro formatada com timestamp e encerra o script.
+#------------------------------------------------------------------------------------------------#
 error_exit() {
     local message="$1"
     local exit_code="${2:-1}"
@@ -46,9 +46,9 @@ error_exit() {
     exit "$exit_code"
 }
 
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 # Verifica se existe um .repo residual no HOME e aborta caso encontrado. - 29/09/2026
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 check_repo_valid() {
     local repo_dir="$HOME/.repo"
 
@@ -61,13 +61,17 @@ check_repo_valid() {
     error_exit "Remove or move $repo_dir before continuing (rm -rf $repo_dir)"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Imprime a mensagem - 29/09/2026
+#------------------------------------------------------------------------------------------------#
 print_header() 
 {
     echo -e "${3:-$B}>>>${RESET} ${1}"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
+#------------------------------------------------------------------------------------------------#
 clone_repo() 
 {
     local repo_url=$1
@@ -83,7 +87,9 @@ clone_repo()
     print_header "${dest} clone success" "#" "$YELLOW"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Clona um repositório de HAL, sobrescrevendo o path caso já exista. 
+#------------------------------------------------------------------------------------------------#
 clone_hal() 
 {
     local url=$1
@@ -93,7 +99,9 @@ clone_hal()
     git clone --depth 1 -b "$branch" "$url" "$path" || error_exit "Failed to clone HAL $path"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Adiciona um pacote em PRODUCT_PACKAGES do device.mk - 29/09/2026
+#------------------------------------------------------------------------------------------------#
 add_to_device_mk()
 {
     local package=$1
@@ -105,7 +113,9 @@ add_to_device_mk()
     echo "PRODUCT_PACKAGES += $package" >> "$device_mk"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Aplica o patch de Signature Spoofing em ComputerEngine.java.
+#------------------------------------------------------------------------------------------------#
 patch_signature_spoofing() {
     local COMPUTER_ENGINE="frameworks/base/services/core/java/com/android/server/pm/ComputerEngine.java"
 
@@ -117,7 +127,9 @@ patch_signature_spoofing() {
     grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" && error_exit "Signature Spoofing patch failed"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Adiciona sufixo -MicroG
+#------------------------------------------------------------------------------------------------#
 patch_version_mk()
 {
     local version_mk="vendor/lineage/config/version.mk"
@@ -140,7 +152,9 @@ endif' "$version_mk"
    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Baixa o APK do Titanium e gera o Android.bp para importação prebuilt.
+#------------------------------------------------------------------------------------------------#
 install_titanium() {
     local versao="152.0.7977.42"
     local dir="device/xiaomi/sapphire/prebuilt/titanium"
@@ -195,7 +209,9 @@ EOF
     add_to_device_mk "DAVx5"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Baixa o APK do Thunderbird e gera o Android.bp para importação prebuilt.
+#------------------------------------------------------------------------------------------------#
 install_thunderbird() 
 {
     echo -e "${CYAN}Cloning Thunderbird prebuilt...${RESET}"
@@ -218,17 +234,18 @@ EOF
     add_to_device_mk "Thunderbird"
 }
 
-##################################################
+#------------------------------------------------------------------------------------------------#
 # AuroraStore
 # --------------------------------------------------
 # Baixa Android.mk, CleanSpec.mk e aurorasetup.sh do proprio repo, depois roda o
 # aurorasetup.sh para baixar o APK mais recente.
 # Baixa os arquivos do AuroraStore e roda o aurorasetup.sh para obter o APK.
+#------------------------------------------------------------------------------------------------#
 install_aurorastore()
 {
     echo -e "${CYAN}Baixando AuroraStore...${RESET}"
 
-    local BASE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/main/AuroraStore"
+    local BASE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/LineageOS-22.2/AuroraStore"
     local files=("Android.mk" "CleanSpec.mk" "aurorasetup.sh")
     local f
 
@@ -270,10 +287,11 @@ EOF
     add_to_device_mk "Gramophone"
 }
 
-#--------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------#
 # REMOVEAPPS
-#--------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------#
 # Gera o módulo RemovePackages com a lista de apps a remover e registra no device.mk
+#------------------------------------------------------------------------------------------------#
 remove_apps() {
     local apps=(StorageManager)
     local dir="device/xiaomi/sapphire/RemoveApps"
@@ -312,12 +330,12 @@ EOF
     print_header "Apps removidos: ${apps[*]}"
 }
 
-#####################################
-#----------------------------------#
-# Script Principal
-#----------------------------------#
 
-# Dei uma pequena melhorada nessa função. o intuito é diminuir as linhas e diminuir as funções inúteis - 29/09/2026
+#------------------------------------------------------------------------------------------------#
+# Começa aqui 
+#------------------------------------------------------------------------------------------------#
+# Dei uma pequena melhorada nessa função. o intuito é diminuir as funções inúteis - 29/09/2026
+#------------------------------------------------------------------------------------------------#
 setup_lineage_dir() {
     LINEAGE_DIR="LOSMG"
     TARGET_DIR="$HOME/$LINEAGE_DIR"
@@ -329,10 +347,10 @@ setup_lineage_dir() {
 }; clear; check_repo_valid; setup_lineage_dir
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # Repository Initialization
 # Initialize the LineageOS source repository
-# ========================================
+#------------------------------------------------------------------------------------------------#
 echo -e "${CYAN}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
@@ -340,17 +358,17 @@ print_header "Repo init success"
 clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
 
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # MG Manifest
 # Baixa o manifest do MicroG do repositorio remoto
-# ========================================
+#------------------------------------------------------------------------------------------------#
 mg_manifest() {
     echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
     mkdir -p .repo/local_manifests
 
     local tmp_file remote_url
     tmp_file=$(mktemp)
-    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/MG-MANIFEST/microg.xml"
+    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-22.2/MG-MANIFEST/microg.xml"
 
     if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
         rm -f "$tmp_file"
@@ -361,18 +379,18 @@ mg_manifest() {
     print_header "MG manifest baixado"
 }; mg_manifest
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # Repository Synchronization
 # Download and synchronize the complete source tree
-# ========================================
+#------------------------------------------------------------------------------------------------#
 clear; echo -e "${CYAN}Syncing full repo...${RESET}"
 repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # Qualcomm HALs
 # Clone the required SM6225 hardware components
-# ========================================
+#------------------------------------------------------------------------------------------------#
 clear; echo -e "${CYAN}Cloning HALs for SM6225...${RESET}"
 clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-22.2"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
@@ -385,7 +403,9 @@ clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_audio.git" "hardware
 clone_hal "https://github.com/sapphire-sm6225/device_qcom_sepolicy_vndr.git" "device/qcom/sepolicy_vndr/sm6225" "lineage-22.0-caf-sm6225"
 print_header "HALs cloned"
 
+#------------------------------------------------------------------------------------------------#
 # Instala o script de upload do GoFile e cria o alias "gofile" no bashrc.
+#------------------------------------------------------------------------------------------------#
 gofile_install()
 {
 echo -e "${CYAN}Installing gofile upload tool...${RESET}"
@@ -398,11 +418,13 @@ source ~/.bashrc 2>/dev/null || true
  print_header "gofile installed"
 }
 
+#------------------------------------------------------------------------------------------------#
 # Substitui o lineage_sapphire.mk do device por uma versão sem GApps.
+#------------------------------------------------------------------------------------------------#
 rgapps()
 {
     local MK_FILE="device/xiaomi/sapphire/lineage_sapphire.mk"
-    local REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/sapphire.mk/lineage_sapphire.mk"
+    local REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-22.2/sapphire.mk/lineage_sapphire.mk"
     local TMP_FILE
 
     [ -f "$MK_FILE" ] || error_exit "$MK_FILE nao encontrado"
@@ -417,24 +439,23 @@ rgapps()
     mv -f "$TMP_FILE" "$MK_FILE"
 }; rgapps
 
-#####################################
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
-#----------------------------------#
+#------------------------------------------------------------------------------------------------#
 patch_signature_spoofing
 patch_version_mk
-#install_titanium
-#install_thunderbird
-#install_aurorastore
+#install_titanium 
+#install_thunderbird 
+#install_aurorastore 
 #install_davx5
-# install_gramophone
+#install_gramophone
 remove_apps
 gofile_install
 
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # Build Environment Setup
-# ========================================
+#------------------------------------------------------------------------------------------------#
 clear; echo -e "${CYAN}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=LineageOS-22.2-MicroG
@@ -443,14 +464,16 @@ export SKIP_ABI_CHECKS=true
 export WITH_GMS=true
 mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 
-# ========================================
+#------------------------------------------------------------------------------------------------#
 # Build
 # Start ROM compilation
-# ========================================
+#------------------------------------------------------------------------------------------------#
 echo -e "${CYAN}Starting build...${RESET}"
  clear; brunch sapphire user || error_exit "Brunch failed"
 
+#------------------------------------------------------------------------------------------------#
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
+#------------------------------------------------------------------------------------------------#
 upload() {
     local build_dir="out/target/product/sapphire"
     local gofile_script="${HOME}/LOSMG/gofile"
