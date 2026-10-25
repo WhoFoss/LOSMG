@@ -4,7 +4,7 @@
 # Autor: WhoFoss <https://github.com/WhoFoss>                       #
 # Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
 # Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
-# Créditos: Sem nome - (Por me ensinar a remover apps)              #
+# Créditos: fwlta - (Por me ensinar a remover apps)                 #
 #                                                                   #                                                            #
 #####################################################################
 
