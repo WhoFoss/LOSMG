@@ -1,21 +1,30 @@
 #!/usr/bin/env bash
 
+#####################################################################
+# Autor: WhoFoss
+# Programa: los23.sh
+# DESCRIÇÃO: Compila o LineageOS 23.2 com MicroG para o sapphire
+# Dependências: repo, git, curl, wget, sed, tput, sha256sum
+# Recursos: HALs SM6225, MicroG, Signature Spoofing, GoFile
+#####################################################################
+
+#####################################
 #----------------------------------#
 # Cores
 #----------------------------------#
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-B=$'\e[1m'
-RESET='\033[0m'
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+B=$(tput bold)
+RESET=$(tput sgr0)
 
 #####################################
 #----------------------------------#
 # Setup do Terminal
 #----------------------------------#
-echo -en "\033[?25l"  # esconde o cursor
-trap 'echo -en "\033[?12l\033[?25h"' EXIT  # restaura ao sair
+tput civis                      # esconde o cursor
+trap 'tput cnorm' EXIT          # restaura ao sair
 
 #####################################
 #----------------------------------#
@@ -27,49 +36,34 @@ error_exit() {
     local message="$1"
     local exit_code="${2:-1}"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "${RED}[ERROR] ${timestamp} - ${message}${RESET}" >&2
+    echo "${RED}${timestamp} - ${message}${RESET}" >&2
     exit "$exit_code"
 }
 
-#----------------------------------#
-# Verifica se existe um .repo residual no HOME e aborta caso encontrado.
-#----------------------------------#
-check_repo_valid() {
-    local repo_dir="$HOME/.repo"
-
-    [ -d "$repo_dir" ] || return 0
-
-    echo "[ERROR] $repo_dir found: leftover workspace in home directory"
-    { [ ! -f "$repo_dir/manifest.xml" ] && [ ! -L "$repo_dir/manifest.xml" ]; } \
-        && echo "[ERROR] Also, this .repo appears incomplete/corrupted (missing manifest.xml)"
-
-    error_exit "Remove or move $repo_dir before continuing (rm -rf $repo_dir)"
-}
-
 # Imprime a mensagem
-print_header() 
+print_header()
 {
-    echo -e "${3:-$B}>>>${RESET} ${1}"
+    echo "${3:-$B}>>>${RESET} ${1}"
 }
 
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
-clone_repo() 
+clone_repo()
 {
     local repo_url=$1
     local branch=$2
     local dest=$3
 
-    echo -e "${CYAN}Cloning $dest...${RESET}"
+    echo "${CYAN}Cloning $dest...${RESET}"
 
     [ -d "$dest" ] && rm -rf "$dest"
 
     git clone --depth 1 -b "$branch" "$repo_url" "$dest" || error_exit "Failed to clone $dest"
 
-    print_header "${dest} clone success" "#" "$YELLOW"
+    print_header "${dest} clone success" "$YELLOW"
 }
 
-# Clona um repositório de HAL, sobrescrevendo o path caso já exista. 
-clone_hal() 
+# Clona um repositório de HAL, sobrescrevendo o path caso já exista.
+clone_hal()
 {
     local url=$1
     local path=$2
@@ -78,16 +72,38 @@ clone_hal()
     git clone --depth 1 -b "$branch" "$url" "$path" || error_exit "Failed to clone HAL $path"
 }
 
+# Adiciona um pacote ao device.mk do sapphire, sem duplicar.
+add_to_device_mk()
+{
+    local package=$1
+    local device_mk="device/xiaomi/sapphire/device.mk"
+
+    [ -f "$device_mk" ] || { echo "${YELLOW}device.mk not found, skipping $package addition${RESET}"; return; }
+
+    if grep -q "^PRODUCT_PACKAGES += $package$" "$device_mk"; then
+        echo "${YELLOW}$package already exists in device.mk${RESET}"
+    else
+        echo "PRODUCT_PACKAGES += $package" >> "$device_mk"
+        print_header "$package added to device.mk"
+    fi
+}
+
 # Aplica o patch de Signature Spoofing em ComputerEngine.java.
 patch_signature_spoofing() {
     local COMPUTER_ENGINE="frameworks/base/services/core/java/com/android/server/pm/ComputerEngine.java"
 
     [ -f "$COMPUTER_ENGINE" ] || error_exit "ComputerEngine.java not found: $COMPUTER_ENGINE"
-    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" || error_exit "Signature Spoofing: isDebuggable() block not found"
+    [ -f "${COMPUTER_ENGINE}.backup" ] || cp "$COMPUTER_ENGINE" "${COMPUTER_ENGINE}.backup"
+
+    if ! grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE"; then
+        print_header "Signature Spoofing already patched"
+        return 0
+    fi
 
     sed -i '/if (!isDebuggable()) {/{N;N;d}' "$COMPUTER_ENGINE"
 
     grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" && error_exit "Signature Spoofing patch failed"
+    print_header "Signature Spoofing patch applied"
 }
 
 # Adiciona sufixo -MicroG
@@ -96,7 +112,7 @@ patch_version_mk()
     local version_mk="vendor/lineage/config/version.mk"
 
     [ -f "$version_mk" ] || error_exit "version.mk not found: $version_mk"
-    grep -q "MicroG" "$version_mk" && return
+    grep -q "MicroG" "$version_mk" && { print_header "MicroG suffix already patched"; return; }
 
     sed -i '/^LINEAGE_VERSION_SUFFIX := .*/a \
 \
@@ -110,7 +126,19 @@ ifneq ($(BUILD_TAG),)\
     LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)\
 endif' "$version_mk"
 
-   grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
+    grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
+    print_header "MicroG suffix patch applied"
+}
+
+# Comenta a linha de GApps no lineage_sapphire.mk.
+comentar_gapps()
+{
+    local mk="device/xiaomi/sapphire/lineage_sapphire.mk"
+
+    [ -f "$mk" ] || { echo "${YELLOW}lineage_sapphire.mk not found, skipping Gapps comment${RESET}"; return; }
+
+    sed -i 's/^-include vendor\/gapps\/arm64\/arm64-vendor.mk/#-include vendor\/gapps\/arm64\/arm64-vendor.mk/' "$mk"
+    print_header "Gapps line commented in lineage_sapphire.mk"
 }
 
 #--------------------------------------------------------------------#
@@ -124,7 +152,7 @@ remove_apps() {
     local lista="" i
 
     for ((i = 0; i < ${#apps[@]}; i++)); do
-        lista+="    ${apps[i]}"
+        lista+="${apps[i]}"
         ((i < ${#apps[@]} - 1)) && lista+=" \\"$'\n'
     done
 
@@ -155,37 +183,10 @@ EOF
     print_header "Apps removidos: ${apps[*]}"
 }
 
-#####################################
-#----------------------------------#
-# Script Principal
-#----------------------------------#
-
-setup_lineage_dir() {
-    LINEAGE_DIR="LOSMG-24"
-    TARGET_DIR="$HOME/$LINEAGE_DIR"
-
-    [ "$PWD" = "$TARGET_DIR" ] && return
-
-    mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
-    cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
-}; clear; check_repo_valid; setup_lineage_dir
-echo -e "${YELLOW}Starting LineageOS 24.0 build script...${RESET}"
-
-# ========================================
-# Repository Initialization
-# ========================================
-echo -e "${CYAN}Initializing repo...${RESET}"
-repo init -u https://github.com/LineageOS/android.git -b lineage-24.0 --git-lfs --depth=1 || error_exit "Repo init failed"
-print_header "Repo init success"
-
-clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire17" ".repo/local_manifests"
-
-# ========================================
-# MG Manifest
-# Baixa o manifest do MicroG do repositorio remoto
-# ========================================
-mg_manifest() {
-    echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
+# Baixa o manifest do MicroG do repositório remoto.
+mg_manifest()
+{
+    echo "${CYAN}Baixando MicroG Manifest...${RESET}"
     mkdir -p .repo/local_manifests
 
     local tmp_file remote_url
@@ -199,87 +200,36 @@ mg_manifest() {
 
     mv -f "$tmp_file" .repo/local_manifests/microg.xml
     print_header "MG manifest baixado"
-}; mg_manifest
-
-
-# ========================================
-# Repository Synchronization
-# ========================================
-clear; echo -e "${CYAN}Syncing full repo...${RESET}"
-repo sync -c -j16 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
-print_header "Repo sync success"
-
-# ========================================
-# Qualcomm HALs
-# Clone the required SM6225 hardware components
-# ========================================
-clear; echo -e "${CYAN}Cloning HALs for SM6225...${RESET}"
-clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-24.0"
-clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_data-ipa-cfg-mgr.git" "hardware/qcom-caf/sm6225/data-ipa-cfg-mgr" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_dataipa.git" "hardware/qcom-caf/sm6225/dataipa" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_display.git" "hardware/qcom-caf/sm6225/display" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_media.git" "hardware/qcom-caf/sm6225/media" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_audio.git" "hardware/qcom-caf/sm6225/audio/primary-hal" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/device_qcom_sepolicy_vndr.git" "device/qcom/sepolicy_vndr/sm6225" "lineage-24.0-caf-sm6225"
-clone_hal "https://github.com/sapphire-sm6225/android_device_lineage_sepolicy" "device/lineage/sepolicy" "lineage-24.0"
-print_header "HALs cloned"
+}
 
 # Instala o script de upload do GoFile e cria o alias "gofile" no bashrc.
 gofile_install()
 {
-echo -e "${CYAN}Installing gofile upload tool...${RESET}"
-wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
-    -O ~/LOSMG-24/gofile && chmod +x ~/LOSMG-24/gofile
-if ! grep -q 'alias gofile' ~/.bashrc; then
-    echo 'alias gofile="~/LOSMG-24/gofile"' >> ~/.bashrc
-fi
-source ~/.bashrc 2>/dev/null || true
- print_header "gofile installed"
+    echo "${CYAN}Installing gofile upload tool...${RESET}"
+    wget -q https://raw.githubusercontent.com/WhoFoss/Build-LineageOS-MicroG/refs/heads/main/gofile/gofile.sh \
+        -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
+
+    grep -q 'alias gofile' ~/.bashrc || echo "alias gofile=\"$TARGET_DIR/gofile\"" >> ~/.bashrc
+
+    print_header "gofile installed"
 }
-
-#----------------------------------#
-# Coisas que voce não precisa saber
-#----------------------------------#
-patch_signature_spoofing
-patch_version_mk
-remove_apps
-gofile_install
-
-#========================================
-# Build Environment Setup
-# ========================================
-clear; echo -e "${CYAN}Setting up build environment...${RESET}"
-source build/envsetup.sh
-export BUILD_USERNAME=LineageOS-24.0-MicroG
-export BUILD_HOSTNAME=WhoFoss
-export SKIP_ABI_CHECKS=true
-export WITH_GMS=true
-mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
-
-# ========================================
-# Build
-# ========================================
-echo -e "${CYAN}Starting build...${RESET}"
- # clear; brunch sapphire user || error_exit "Brunch failed"
 
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 upload() {
     local build_dir="out/target/product/sapphire"
-    local gofile_script="${HOME}/LOSMG-24/gofile"
+    local gofile_script="${TARGET_DIR}/gofile"
     local rom_path boot_path rom_name rom_size rom_sha256
     local boot_sha256 rom_output boot_output rom_url boot_url
 
-    [ -d "$build_dir" ] || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
-    [ -x "$gofile_script" ] || { echo -e "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
+    [ -d "$build_dir" ] || { echo "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
+    [ -x "$gofile_script" ] || { echo "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
 
-    ### Localiza os arquivos 
-    rom_path=$(ls -t "$build_dir"/lineage-24.0-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
+    ### Localiza os arquivos
+    rom_path=$(ls -t "$build_dir"/lineage-23.2-*sapphire*.zip 2>/dev/null | head -n1)
     boot_path="$build_dir/init_boot.img"
 
-    [ -z "$rom_path" ] && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
-    [ -f "$boot_path" ] || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
+    [ -z "$rom_path" ] && { echo "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
+    [ -f "$boot_path" ] || { echo "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
 
     ### Metadados da ROM
     rom_name=${rom_path##*/}
@@ -287,28 +237,108 @@ upload() {
     rom_sha256=$(sha256sum "$rom_path" | cut -d' ' -f1)
     echo "$rom_sha256 $rom_name" > "${rom_path}.sha256"
 
-    ### Metadados do init_boot 
+    ### Metadados do init_boot
     boot_sha256=$(sha256sum "$boot_path" | cut -d' ' -f1)
     echo "$boot_sha256 init_boot.img" > "${boot_path}.sha256"
 
     #### Upload ROM
     rom_output=$("$gofile_script" "$rom_path" 2>&1) \
-        || { echo -e "${RED}Upload da ROM falhou:\n$rom_output${RESET}"; return 1; }
+        || { echo "${RED}Upload da ROM falhou:\n$rom_output${RESET}"; return 1; }
     rom_url=$(grep -oP 'https?://[^\s]+' <<< "$rom_output" | head -n1)
 
-    #### Upload init_boot 
+    #### Upload init_boot
     boot_output=$("$gofile_script" "$boot_path" 2>&1) \
-        || { echo -e "${RED}Upload do init_boot falhou:\n$boot_output${RESET}"; return 1; }
+        || { echo "${RED}Upload do init_boot falhou:\n$boot_output${RESET}"; return 1; }
     boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
 
     #### Resumo
-    echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
-    [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
-    echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
+    echo "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
+    [ -n "$rom_url" ] && echo "${CYAN}Link ROM:${RESET} $rom_url"
+    echo "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
     echo
-    echo -e "${CYAN}init_boot:${RESET} init_boot.img"
-    [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
-    echo -e "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
+    echo "${CYAN}init_boot:${RESET} init_boot.img"
+    [ -n "$boot_url" ] && echo "${CYAN}Link Boot:${RESET} $boot_url"
+    echo "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
 
     [ -n "$rom_url" ] && [ -n "$boot_url" ]
 }
+
+#####################################
+#----------------------------------#
+# Script Principal
+#----------------------------------#
+
+# Entra (ou cria) o diretório de trabalho do LineageOS-MicroG.
+setup_lineage_dir() {
+    LINEAGE_DIR="LineageOS-MicroG"
+    TARGET_DIR="$HOME/$LINEAGE_DIR"
+
+    [ "$PWD" = "$TARGET_DIR" ] && return
+
+    mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
+    cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
+}; clear; check_repo_valid; setup_lineage_dir
+echo "${YELLOW}Starting LineageOS 23.2 build script...${RESET}"
+
+# ========================================
+# Repository Initialization
+# ========================================
+cleanup_repos
+
+echo "${CYAN}Initializing repo...${RESET}"
+repo init -u https://github.com/LineageOS/android.git -b lineage-23.2 --git-lfs --depth=1 || error_exit "Repo init failed"
+print_header "Repo init success"
+
+clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire16" ".repo/local_manifests"
+mg_manifest
+
+# ========================================
+# Repository Synchronization
+# ========================================
+clear; echo "${CYAN}Syncing full repo...${RESET}"
+repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
+print_header "Repo sync success"
+
+# ========================================
+# Qualcomm HALs
+# Clone the required SM6225 hardware components
+# ========================================
+clear; echo "${CYAN}Cloning HALs for SM6225...${RESET}"
+clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-23.2"
+clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-22.0-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_data-ipa-cfg-mgr.git" "hardware/qcom-caf/sm6225/data-ipa-cfg-mgr" "lineage-23.2-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_dataipa.git" "hardware/qcom-caf/sm6225/dataipa" "lineage-23.2-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_display.git" "hardware/qcom-caf/sm6225/display" "lineage-22.0-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_media.git" "hardware/qcom-caf/sm6225/media" "lineage-23.2-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_audio.git" "hardware/qcom-caf/sm6225/audio/primary-hal" "lineage-22.0-caf-sm6225"
+clone_hal "https://github.com/sapphire-sm6225/device_qcom_sepolicy_vndr.git" "device/qcom/sepolicy_vndr/sm6225" "lineage-23.2-caf-sm6225"
+print_header "HALs cloned"
+
+#----------------------------------#
+# Coisas que voce não precisa saber
+#----------------------------------#
+gofile_install
+comentar_gapps
+remove_apps
+patch_signature_spoofing
+patch_version_mk
+
+# ========================================
+# Build Environment Setup
+# ========================================
+clear; echo "${CYAN}Setting up build environment...${RESET}"
+source build/envsetup.sh
+export BUILD_USERNAME=WhoFoss
+export BUILD_HOSTNAME=LineageOS-23.2
+export SKIP_ABI_CHECKS=true
+export WITH_GMS=true
+mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
+print_header "Build environment ready"
+
+# ========================================
+# Build
+# ========================================
+echo "${RED}Starting build...${RESET}"
+brunch sapphire user || error_exit "Brunch failed"
+upload
