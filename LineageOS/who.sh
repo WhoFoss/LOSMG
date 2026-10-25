@@ -191,7 +191,7 @@ mg_manifest()
 
     local tmp_file remote_url
     tmp_file=$(mktemp)
-    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/MG-MANIFEST/microg.xml"
+    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/Lineage-23.2/MG-MANIFEST/microg.xml"
 
     if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
         rm -f "$tmp_file"
@@ -206,7 +206,7 @@ mg_manifest()
 gofile_install()
 {
     echo "${CYAN}Installing gofile upload tool...${RESET}"
-    wget -q https://raw.githubusercontent.com/WhoFoss/Build-LineageOS-MicroG/refs/heads/main/gofile/gofile.sh \
+    wget -q https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/Lineage-23.2/gofile/gofile.sh \
         -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
 
     grep -q 'alias gofile' ~/.bashrc || echo "alias gofile=\"$TARGET_DIR/gofile\"" >> ~/.bashrc
@@ -263,12 +263,12 @@ upload() {
     [ -n "$rom_url" ] && [ -n "$boot_url" ]
 }
 
-#####################################
+
 #----------------------------------#
 # Script Principal
 #----------------------------------#
-
 # Entra (ou cria) o diretório de trabalho do LineageOS-MicroG.
+#----------------------------------#
 setup_lineage_dir() {
     LINEAGE_DIR="LineageOS-MicroG"
     TARGET_DIR="$HOME/$LINEAGE_DIR"
@@ -280,11 +280,9 @@ setup_lineage_dir() {
 }; clear; check_repo_valid; setup_lineage_dir
 echo "${YELLOW}Starting LineageOS 23.2 build script...${RESET}"
 
-# ========================================
+#----------------------------------#
 # Repository Initialization
-# ========================================
-cleanup_repos
-
+#----------------------------------#
 echo "${CYAN}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-23.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
@@ -292,9 +290,9 @@ print_header "Repo init success"
 clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire16" ".repo/local_manifests"
 mg_manifest
 
-# ========================================
+#----------------------------------#
 # Repository Synchronization
-# ========================================
+#----------------------------------#
 clear; echo "${CYAN}Syncing full repo...${RESET}"
 repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
 print_header "Repo sync success"
@@ -324,9 +322,9 @@ remove_apps
 patch_signature_spoofing
 patch_version_mk
 
-# ========================================
+#----------------------------------#
 # Build Environment Setup
-# ========================================
+#----------------------------------#
 clear; echo "${CYAN}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=WhoFoss
@@ -336,9 +334,9 @@ export WITH_GMS=true
 mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 print_header "Build environment ready"
 
-# ========================================
+#----------------------------------#
 # Build
-# ========================================
+#----------------------------------#
 echo "${RED}Starting build...${RESET}"
 brunch sapphire user || error_exit "Brunch failed"
 upload
