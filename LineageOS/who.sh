@@ -179,7 +179,7 @@ echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 # Repository Initialization
 # Initialize the LineageOS source repository
 #------------------------------------------------------------------------------------------------#
-echo -e "${CYAN}Initializing repo...${RESET}"
+echo -e "${YELLOW}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
 
@@ -191,7 +191,7 @@ clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15
 # Baixa o manifest do MicroG do repositorio remoto
 #------------------------------------------------------------------------------------------------#
 mg_manifest() {
-    echo -e "${CYAN}Baixando MicroG Manifest...${RESET}"
+    echo -e "${YELLOW}Baixando MicroG Manifest...${RESET}"
     mkdir -p .repo/local_manifests
 
     local tmp_file remote_url
@@ -211,7 +211,7 @@ mg_manifest() {
 # Repository Synchronization
 # Download and synchronize the complete source tree
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${CYAN}Syncing full repo...${RESET}"
+clear; echo -e "${YELLOW}Syncing full repo...${RESET}"
 repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
@@ -219,7 +219,7 @@ print_header "Repo sync success"
 # Qualcomm HALs
 # Clone the required SM6225 hardware components
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${CYAN}Cloning HALs for SM6225...${RESET}"
+clear; echo -e "${YELLOW}Cloning HALs for SM6225...${RESET}"
 clone_hal "https://github.com/sapphire-sm6225/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-22.2"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
 clone_hal "https://github.com/sapphire-sm6225/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-22.0-caf-sm6225"
@@ -236,16 +236,12 @@ print_header "HALs cloned"
 #------------------------------------------------------------------------------------------------#
 gofile_install()
 {
-echo -e "${CYAN}Installing gofile upload tool...${RESET}"
-wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
-    -O ~/LOSMG/gofile && chmod +x ~/LOSMG/gofile
-if ! grep -q 'alias gofile' ~/.bashrc; then
-    echo 'alias gofile="~/LOSMG/gofile"' >> ~/.bashrc
-fi
-source ~/.bashrc 2>/dev/null || true
- print_header "gofile installed"
-}
+    echo "${YELLOW}Installing gofile upload tool...${RESET}"
+    wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
+        -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
 
+    grep -q 'alias gofile' ~/.bashrc || echo "alias gofile=\"$TARGET_DIR/gofile\"" >> ~/.bashrc
+}
 #------------------------------------------------------------------------------------------------#
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 #------------------------------------------------------------------------------------------------#
@@ -286,13 +282,13 @@ upload() {
     boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
 
     #### Resumo
-    echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
-    [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
-    echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
+    echo -e "${YELLOW}ROM:${RESET} ${rom_name} (${rom_size})"
+    [ -n "$rom_url" ] && echo -e "${YELLOW}Link ROM:${RESET} $rom_url"
+    echo -e "${YELLOW}SHA256 ROM:${RESET} $rom_sha256"
     echo
-    echo -e "${CYAN}init_boot:${RESET} init_boot.img"
+    echo -e "${YELLOW}init_boot:${RESET} init_boot.img"
     [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
-    echo -e "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
+    echo -e "${YELLOW}SHA256 init_boot:${RESET} $boot_sha256"
 
     [ -n "$rom_url" ] && [ -n "$boot_url" ]
 }
@@ -329,7 +325,7 @@ gofile_install
 #------------------------------------------------------------------------------------------------#
 # Build Environment Setup
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${CYAN}Setting up build environment...${RESET}"
+clear; echo -e "${YELLOW}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=LineageOS-22.2-MicroG
 export BUILD_HOSTNAME=WhoFoss
@@ -341,6 +337,6 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 # Build
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
-echo -e "${CYAN}Starting build...${RESET}"
+echo -e "${YELLOW}Starting build...${RESET}"
  clear; brunch sapphire user || error_exit "Brunch failed"
 upload
