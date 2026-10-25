@@ -5,15 +5,7 @@
 # Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
 # Créditos: Angelpro09xd - (Por me ensinar a compilar).             #
 # Créditos: Sem nome - (Por me ensinar a remover apps)              #
-#                                                                   #
-# DESCRIÇÃO:                                                        #
-# script automatizado do LineageOS 22.2 com MicroG para             #
-#            o Xiaomi Redmi Note 13 4G (sapphire, SM6225/SD685).    #
-#            Faz repo init/sync, clone de device tree/HALs/pacotes  #
-#            modificados, manifest local do MicroG, patches         #
-#            (signature spoofing, sufixo de versão), instalação de  #
-#            apps, remoção dos GApps, preparo                       #
-#            do ambiente de build e upload da ROM via GoFile.       #                                                             #
+#                                                                   #                                                            #
 #####################################################################
 
 #------------------------------------------------------------------------------------------------#
@@ -419,6 +411,57 @@ source ~/.bashrc 2>/dev/null || true
 }
 
 #------------------------------------------------------------------------------------------------#
+# Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
+#------------------------------------------------------------------------------------------------#
+upload() {
+    local build_dir="out/target/product/sapphire"
+    local gofile_script="${HOME}/LOSMG/gofile"
+    local rom_path boot_path rom_name rom_size rom_sha256
+    local boot_sha256 rom_output boot_output rom_url boot_url
+
+    [ -d "$build_dir" ] || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
+    [ -x "$gofile_script" ] || { echo -e "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
+
+    ### Localiza os arquivos 
+    rom_path=$(ls -t "$build_dir"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
+    boot_path="$build_dir/init_boot.img"
+
+    [ -z "$rom_path" ] && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
+    [ -f "$boot_path" ] || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
+
+    ### Metadados da ROM
+    rom_name=${rom_path##*/}
+    rom_size=$(du -h "$rom_path" | cut -f1)
+    rom_sha256=$(sha256sum "$rom_path" | cut -d' ' -f1)
+    echo "$rom_sha256 $rom_name" > "${rom_path}.sha256"
+
+    ### Metadados do init_boot 
+    boot_sha256=$(sha256sum "$boot_path" | cut -d' ' -f1)
+    echo "$boot_sha256 init_boot.img" > "${boot_path}.sha256"
+
+    #### Upload ROM
+    rom_output=$("$gofile_script" "$rom_path" 2>&1) \
+        || { echo -e "${RED}Upload da ROM falhou:\n$rom_output${RESET}"; return 1; }
+    rom_url=$(grep -oP 'https?://[^\s]+' <<< "$rom_output" | head -n1)
+
+    #### Upload init_boot 
+    boot_output=$("$gofile_script" "$boot_path" 2>&1) \
+        || { echo -e "${RED}Upload do init_boot falhou:\n$boot_output${RESET}"; return 1; }
+    boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
+
+    #### Resumo
+    echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
+    [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
+    echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
+    echo
+    echo -e "${CYAN}init_boot:${RESET} init_boot.img"
+    [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
+    echo -e "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
+
+    [ -n "$rom_url" ] && [ -n "$boot_url" ]
+}
+
+#------------------------------------------------------------------------------------------------#
 # Substitui o lineage_sapphire.mk do device por uma versão sem GApps.
 #------------------------------------------------------------------------------------------------#
 rgapps()
@@ -470,54 +513,4 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 #------------------------------------------------------------------------------------------------#
 echo -e "${CYAN}Starting build...${RESET}"
  clear; brunch sapphire user || error_exit "Brunch failed"
-
-#------------------------------------------------------------------------------------------------#
-# Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
-#------------------------------------------------------------------------------------------------#
-upload() {
-    local build_dir="out/target/product/sapphire"
-    local gofile_script="${HOME}/LOSMG/gofile"
-    local rom_path boot_path rom_name rom_size rom_sha256
-    local boot_sha256 rom_output boot_output rom_url boot_url
-
-    [ -d "$build_dir" ] || { echo -e "${RED}Build dir não existe: $build_dir${RESET}"; return 1; }
-    [ -x "$gofile_script" ] || { echo -e "${RED}gofile não executável: $gofile_script${RESET}"; return 1; }
-
-    ### Localiza os arquivos 
-    rom_path=$(ls -t "$build_dir"/lineage-22.2-*-UNOFFICIAL-sapphire*.zip 2>/dev/null | head -n1)
-    boot_path="$build_dir/init_boot.img"
-
-    [ -z "$rom_path" ] && { echo -e "${YELLOW}ROM não encontrada em $build_dir${RESET}"; return 1; }
-    [ -f "$boot_path" ] || { echo -e "${YELLOW}init_boot.img não encontrado: $boot_path${RESET}"; return 1; }
-
-    ### Metadados da ROM
-    rom_name=${rom_path##*/}
-    rom_size=$(du -h "$rom_path" | cut -f1)
-    rom_sha256=$(sha256sum "$rom_path" | cut -d' ' -f1)
-    echo "$rom_sha256 $rom_name" > "${rom_path}.sha256"
-
-    ### Metadados do init_boot 
-    boot_sha256=$(sha256sum "$boot_path" | cut -d' ' -f1)
-    echo "$boot_sha256 init_boot.img" > "${boot_path}.sha256"
-
-    #### Upload ROM
-    rom_output=$("$gofile_script" "$rom_path" 2>&1) \
-        || { echo -e "${RED}Upload da ROM falhou:\n$rom_output${RESET}"; return 1; }
-    rom_url=$(grep -oP 'https?://[^\s]+' <<< "$rom_output" | head -n1)
-
-    #### Upload init_boot 
-    boot_output=$("$gofile_script" "$boot_path" 2>&1) \
-        || { echo -e "${RED}Upload do init_boot falhou:\n$boot_output${RESET}"; return 1; }
-    boot_url=$(grep -oP 'https?://[^\s]+' <<< "$boot_output" | head -n1)
-
-    #### Resumo
-    echo -e "${CYAN}ROM:${RESET} ${rom_name} (${rom_size})"
-    [ -n "$rom_url" ] && echo -e "${CYAN}Link ROM:${RESET} $rom_url"
-    echo -e "${CYAN}SHA256 ROM:${RESET} $rom_sha256"
-    echo
-    echo -e "${CYAN}init_boot:${RESET} init_boot.img"
-    [ -n "$boot_url" ] && echo -e "${CYAN}Link Boot:${RESET} $boot_url"
-    echo -e "${CYAN}SHA256 init_boot:${RESET} $boot_sha256"
-
-    [ -n "$rom_url" ] && [ -n "$boot_url" ]
-}; upload
+upload
