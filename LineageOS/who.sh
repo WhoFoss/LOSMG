@@ -56,7 +56,7 @@ clone_repo()
     local branch=$2
     local dest=$3
 
-    echo -e "${CYAN}Cloning $dest...${RESET}"
+    echo -e "${YELLOW}Cloning $dest...${RESET}"
 
     [ -d "$dest" ] && rm -rf "$dest"
 
