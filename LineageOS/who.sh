@@ -225,6 +225,11 @@ clone_hal "https://github.com/sapphire-sm6225/hardware_qcom_audio.git" "hardware
 clone_hal "https://github.com/sapphire-sm6225/device_qcom_sepolicy_vndr.git" "device/qcom/sepolicy_vndr/sm6225" "lineage-24.0-caf-sm6225"
 print_header "HALs cloned"
 
+print_header "HALs cloned"
+
+# Clona o sepolicy modificado do Lineage
+clone_repo "https://github.com/sapphire-sm6225/android_device_lineage_sepolicy" "lineage-24.0" "device/lineage/sepolicy"
+
 # Instala o script de upload do GoFile e cria o alias "gofile" no bashrc.
 gofile_install()
 {
