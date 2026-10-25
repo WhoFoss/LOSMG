@@ -41,9 +41,16 @@ error_exit() {
 #------------------------------------------------------------------------------------------------#
 # Imprime a mensagem - 29/09/2026
 #------------------------------------------------------------------------------------------------#
-print_header() 
+# Imprime uma etapa com o tempo decorrido do script; $2 opcional define a cor da barra.
+print_header()
 {
-    echo -e "${3:-$B}>>>${RESET} ${1}"
+    local mensagem="$1"
+    local cor="${2:-$CYAN}"
+    local seg=$SECONDS
+
+    printf '%s%02d:%02d%s %s▌%s %s%s%s\n' \
+        "$(tput dim)" $((seg / 60)) $((seg % 60)) "$RESET" \
+        "$cor" "$RESET" "$B" "$mensagem" "$RESET"
 }
 
 #------------------------------------------------------------------------------------------------#
