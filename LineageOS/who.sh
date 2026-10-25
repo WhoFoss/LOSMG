@@ -41,8 +41,11 @@ error_exit() {
 #------------------------------------------------------------------------------------------------#
 # Imprime a mensagem - 29/09/2026
 #------------------------------------------------------------------------------------------------#
+# Imprime uma etapa concluída com o tempo decorrido do script; $2 opcional define a cor.
 print_header() {
-    echo "${3:-$B}>>>${RESET} ${1}"; }
+    local cor="${2:-$GREEN}"
+    
+    printf '%s%s%s %s(%dm%02ds)%s\n' "$cor" "$1" "$RESET" "$(tput dim)" $((SECONDS / 60)) $((SECONDS % 60)) "$RESET"; }
     
 #------------------------------------------------------------------------------------------------#
 # Clona (ou reclona) um repositório git raso em um diretório de destino.
