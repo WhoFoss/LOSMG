@@ -190,7 +190,7 @@ mg_manifest() {
 
     local tmp_file remote_url
     tmp_file=$(mktemp)
-    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/MG-MANIFEST/microg.xml"
+    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-24.0/MG-MANIFEST/microg.xml"
 
     if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
         rm -f "$tmp_file"
