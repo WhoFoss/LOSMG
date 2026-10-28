@@ -338,5 +338,5 @@ mkdir -p out/target/product/sapphire/obj/KERNEL_OBJ/usr
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
- clear; brunch sapphire user || error_exit "Brunch failed"
+# clear; brunch sapphire user || error_exit "Brunch failed"
 upload
