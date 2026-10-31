@@ -84,11 +84,34 @@ patch_signature_spoofing() {
     local COMPUTER_ENGINE="frameworks/base/services/core/java/com/android/server/pm/ComputerEngine.java"
 
     [ -f "$COMPUTER_ENGINE" ] || error_exit "ComputerEngine.java not found: $COMPUTER_ENGINE"
-    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" || error_exit "Signature Spoofing: isDebuggable() block not found"
 
-    sed -i '/if (!isDebuggable()) {/{N;N;d}' "$COMPUTER_ENGINE"
+    if ! grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE"; then
+        print_header "Signature Spoofing already patched, skipping"
+        return 0
+    fi
 
-    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" && error_exit "Signature Spoofing patch failed"
+    awk '
+        /^[[:space:]]*if \(!isDebuggable\(\)\) \{/ { skip=1; depth=0 }
+        skip {
+            depth += gsub(/\{/, "{")
+            depth -= gsub(/\}/, "}")
+            if (depth <= 0) { skip=0; was_skipping=1 }
+            next
+        }
+        was_skipping && /^[[:space:]]*$/ { was_skipping=0; next }
+        { was_skipping=0; print }
+    ' "$COMPUTER_ENGINE" > "${COMPUTER_ENGINE}.tmp" \
+        && mv -f "${COMPUTER_ENGINE}.tmp" "$COMPUTER_ENGINE"
+
+    if grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE"; then
+        rm -f "${COMPUTER_ENGINE}.tmp"
+        error_exit "Signature Spoofing patch failed (block not removed)"
+    fi
+
+    grep -q 'isMicrogSigned' "$COMPUTER_ENGINE" \
+        || error_exit "Signature Spoofing patch failed (method corrupted)"
+
+    print_header "Signature Spoofing patch applied"
 }
 
 #------------------------------------------------------------------------------------------------#
@@ -97,23 +120,63 @@ patch_signature_spoofing() {
 patch_version_mk()
 {
     local version_mk="vendor/lineage/config/version.mk"
+    local marker="# LOSMG: MicroG suffix"
 
     [ -f "$version_mk" ] || error_exit "version.mk not found: $version_mk"
-    grep -q "MicroG" "$version_mk" && return
 
-    sed -i '/^LINEAGE_VERSION_SUFFIX := .*/a \
-\
-# Add MICROG to suffix if WITH_GMS is true\
-ifeq ($(WITH_GMS),true)\
-    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-MicroG\
-endif\
-\
-# Add custom build tag/feature to suffix if BUILD_TAG is defined\
-ifneq ($(BUILD_TAG),)\
-    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)\
-endif' "$version_mk"
+    # Idempotente: já tem o bloco?
+    grep -qF "$marker" "$version_mk" && {
+        print_header "MicroG suffix already present, skipping" "#" "$YELLOW"
+        return 0
+    }
 
-   grep -q "MicroG" "$version_mk" || error_exit "MicroG suffix patch failed"
+    # Se LINEAGE_VERSION_SUFFIX existe, insere depois dela; senão, append no final
+    if grep -q '^LINEAGE_VERSION_SUFFIX :=' "$version_mk"; then
+        awk -v marker="$marker" '
+            /^LINEAGE_VERSION_SUFFIX :=/ && !done {
+                print
+                print ""
+                print marker
+                print "# Add MICROG to suffix if WITH_GMS is true"
+                print "ifeq ($(WITH_GMS),true)"
+                print "    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-MicroG"
+                print "endif"
+                print ""
+                print "# Add custom build tag/feature to suffix if BUILD_TAG is defined"
+                print "ifneq ($(BUILD_TAG),)"
+                print "    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)"
+                print "endif"
+                done=1
+                next
+            }
+            { print }
+        ' "$version_mk" > "${version_mk}.tmp" \
+            && mv -f "${version_mk}.tmp" "$version_mk"
+    else
+        cat >> "$version_mk" <<'EOF'
+
+# LOSMG: MicroG suffix
+# Add MICROG to suffix if WITH_GMS is true
+ifeq ($(WITH_GMS),true)
+    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-MicroG
+endif
+
+# Add custom build tag/feature to suffix if BUILD_TAG is defined
+ifneq ($(BUILD_TAG),)
+    LINEAGE_VERSION_SUFFIX := $(LINEAGE_VERSION_SUFFIX)-$(BUILD_TAG)
+endif
+EOF
+    fi
+
+    # Validação
+    grep -qF "$marker" "$version_mk" \
+        || error_exit "MicroG suffix patch failed (marker not found after patch)"
+
+    # Sanidade: a linha que define o sufixo deve existir agora
+    grep -q 'LINEAGE_VERSION_SUFFIX' "$version_mk" \
+        || error_exit "MicroG suffix patch failed (LINEAGE_VERSION_SUFFIX missing)"
+
+    print_header "MicroG suffix patch applied" "#" "$GREEN"
 }
 
 #------------------------------------------------------------------------------------------------#
