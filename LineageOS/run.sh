@@ -275,7 +275,7 @@ mg_manifest() {
 # Download and synchronize the complete source tree
 #------------------------------------------------------------------------------------------------#
 clear; echo -e "${YELLOW}Syncing full repo...${RESET}"
-repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+repo sync -c -j4 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
 #------------------------------------------------------------------------------------------------#
