@@ -43,7 +43,7 @@ error_exit() {
 # Imprime a mensagem
 print_header()
 {
-    echo "${3:-$B}>>>${RESET} ${1}"
+    echo -e "${3:-$B}>>>${RESET} ${1}"
 }
     
 #------------------------------------------------------------------------------------------------#
@@ -298,7 +298,7 @@ print_header "HALs cloned"
 #------------------------------------------------------------------------------------------------#
 gofile_install()
 {
-    echo "${YELLOW}Installing gofile upload tool...${RESET}"
+    echo -e "${YELLOW}Installing gofile upload tool...${RESET}"
     wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
         -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
 
