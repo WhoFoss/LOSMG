@@ -235,7 +235,7 @@ setup_lineage_dir() {
 
     mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
     cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
-}; clear; check_repo_valid; setup_lineage_dir
+}; clear; setup_lineage_dir
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 
 #------------------------------------------------------------------------------------------------#
