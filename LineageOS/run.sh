@@ -246,7 +246,7 @@ echo -e "${YELLOW}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
 
-clone_repo "https://github.com/saroj-nokia/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
+clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
 
 
 #------------------------------------------------------------------------------------------------#
