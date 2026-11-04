@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# set -euo pipefail
+set -euo pipefail
 #####################################################################
 # Autor: WhoFoss <https://github.com/WhoFoss>                       #
 # Créditos: Saroj-Tajpuriya - (disponibilizou a device tree)        #
@@ -268,7 +268,7 @@ mg_manifest() {
 
     mv -f "$tmp_file" .repo/local_manifests/microg.xml
     print_header "MG manifest baixado"
-}; mg_manifest
+}
 
 #------------------------------------------------------------------------------------------------#
 # Repository Synchronization
