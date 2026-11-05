@@ -178,6 +178,21 @@ EOF
     print_header "MicroG suffix patch applied" "#" "$GREEN"
 }
 
+
+#####################################################################
+#------------------------ PATCH: IME NAVBAR ------------------------#
+#####################################################################
+# Desativa a barra de navegação desenhada pelo teclado no modo gestos
+patch_ime_navbar() {
+    local arq="$LOS_DIR/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
+
+    [ -f "$arq" ] || { echo "${amarelo}Arquivo não encontrado: $arq${reset}"; return 1; }
+
+    grep -q 'name="config_imeDrawsImeNavBar">false' "$arq" && { echo "${verde}Patch IME navbar já aplicado${reset}"; return 0; }
+
+    sed -i 's|\(name="config_imeDrawsImeNavBar">\)true|\1false|' "$arq" && echo "${verde}Patch IME navbar aplicado${reset}"
+}
+
 #------------------------------------------------------------------------------------------------#
 # REMOVEAPPS
 #------------------------------------------------------------------------------------------------#
