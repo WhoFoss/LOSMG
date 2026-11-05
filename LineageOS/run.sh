@@ -260,29 +260,10 @@ echo -e "${YELLOW}Initializing repo...${RESET}"
 repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --depth=1 || error_exit "Repo init failed"
 print_header "Repo init success"
 
+#------------------------------------------------------------------------------------------------#
+# Clona o local_manifests_sapphire
+#------------------------------------------------------------------------------------------------#
 clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
-
-
-#------------------------------------------------------------------------------------------------#
-# MG Manifest
-# Baixa o manifest do MicroG do repositorio remoto
-#------------------------------------------------------------------------------------------------#
-mg_manifest() {
-    echo -e "${YELLOW}Baixando MicroG Manifest...${RESET}"
-    mkdir -p .repo/local_manifests
-
-    local tmp_file remote_url
-    tmp_file=$(mktemp)
-    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-22.2/MG-MANIFEST/microg.xml"
-
-    if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
-        rm -f "$tmp_file"
-        error_exit "Falha ao baixar $remote_url (ou arquivo vazio)"
-    fi
-
-    mv -f "$tmp_file" .repo/local_manifests/microg.xml
-    print_header "MG manifest baixado"
-}
 
 #------------------------------------------------------------------------------------------------#
 # Repository Synchronization
@@ -371,33 +352,13 @@ upload() {
 }
 
 #------------------------------------------------------------------------------------------------#
-# Substitui o lineage_sapphire.mk do device por uma versão sem GApps.
-#------------------------------------------------------------------------------------------------#
-rgapps()
-{
-    local MK_FILE="device/xiaomi/sapphire/lineage_sapphire.mk"
-    local REMOTE_URL="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-22.2/sapphire.mk/lineage_sapphire.mk"
-    local TMP_FILE
-
-    [ -f "$MK_FILE" ] || error_exit "$MK_FILE nao encontrado"
-
-    TMP_FILE=$(mktemp)
-
-    if ! curl -fsSL -o "$TMP_FILE" "$REMOTE_URL" || [ ! -s "$TMP_FILE" ]; then
-        rm -f "$TMP_FILE"
-        error_exit "Falha ao baixar $REMOTE_URL"
-    fi
-
-    mv -f "$TMP_FILE" "$MK_FILE"
-}; rgapps
-
-#------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
 gofile_install
 patch_signature_spoofing
 patch_version_mk
 remove_apps
+patch_ime_navbar
 
 #------------------------------------------------------------------------------------------------#
 # Build Environment Setup
@@ -413,5 +374,5 @@ export SKIP_ABI_CHECKS=true
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
-#clear; brunch sapphire user || error_exit "Brunch failed"
-#upload
+clear; brunch sapphire user || error_exit "Brunch failed"
+upload
