@@ -1,5 +1,5 @@
 ```
-curl -fsSL https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/main/LineageOS-22.2/who.sh | bash
+curl -fsSL https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/WhoFoss/LineageOS/who.sh | bash
 ```
 ---
 <summary>Versão mais recente disponível: </summary>
