@@ -1,6 +1,6 @@
 ### Script automatizado
 ```
-curl -fsSL https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/LineageOS-22.2/LineageOS/run.sh| bash
+curl -fsSL https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/WhoFoss/LineageOS/who.sh | bash
 ```
 
 ### Gofile upload
