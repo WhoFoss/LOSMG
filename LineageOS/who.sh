@@ -184,13 +184,28 @@ EOF
 #####################################################################
 # Desativa a barra de navegação desenhada pelo teclado no modo gestos
 patch_ime_navbar() {
-    local arq="$LOS_DIR/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
+    local root arq
+    root="$(los_root)" || {
+        echo -e "${YELLOW}Não encontrei a raiz do LOS (nem \$LOS_DIR, nem subindo do cwd, nem \$HOME/LOSMG)${RESET}"
+        return 1
+    }
 
-    [ -f "$arq" ] || { echo "${amarelo}Arquivo não encontrado: $arq${reset}"; return 1; }
+    arq="$root/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
 
-    grep -q 'name="config_imeDrawsImeNavBar">false' "$arq" && { echo "${verde}Patch IME navbar já aplicado${reset}"; return 0; }
+    [ -f "$arq" ] || {
+        echo -e "${YELLOW}Arquivo não encontrado: $arq${RESET}"
+        return 1
+    }
 
-    sed -i 's|\(name="config_imeDrawsImeNavBar">\)true|\1false|' "$arq" && echo "${verde}Patch IME navbar aplicado${reset}"
+    grep -qE 'name="config_imeDrawsImeNavBar">[[:space:]]*false' "$arq" \
+        && { echo -e "${GREEN}Patch IME navbar já aplicado${RESET}"; return 0; }
+
+    sed -i -E 's|(name="config_imeDrawsImeNavBar">)[[:space:]]*true|\1false|' "$arq" \
+        || { echo -e "${RED}sed falhou em $arq${RESET}"; return 1; }
+
+    grep -qE 'name="config_imeDrawsImeNavBar">[[:space:]]*false' "$arq" \
+        && { echo -e "${GREEN}Patch IME navbar aplicado${RESET}"; return 0; } \
+        || { echo -e "${RED}sed rodou mas o valor não mudou${RESET}"; return 1; }
 }
 
 #------------------------------------------------------------------------------------------------#
@@ -374,5 +389,5 @@ export SKIP_ABI_CHECKS=true
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
-clear; brunch sapphire user || error_exit "Brunch failed"
+#clear; brunch sapphire user || error_exit "Brunch failed"
 upload
