@@ -184,7 +184,7 @@ EOF
 #####################################################################
 # Desativa a barra de navegação desenhada pelo teclado no modo gestos
 patch_ime_navbar() {
-    local arq="$TARGET_DIR/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
+    local arq="frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
 
     [ -f "$arq" ] || {
         echo -e "${YELLOW}Arquivo não encontrado: $arq${RESET}"
@@ -363,11 +363,11 @@ upload() {
 #------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
+patch_ime_navbar || error_exit "patch_ime_navbar failed"
 gofile_install
 patch_signature_spoofing
 patch_version_mk
-remove_apps
-patch_ime_navbar
+remove_apps 
 
 #------------------------------------------------------------------------------------------------#
 # Build Environment Setup
