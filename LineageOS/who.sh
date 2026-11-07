@@ -184,13 +184,7 @@ EOF
 #####################################################################
 # Desativa a barra de navegação desenhada pelo teclado no modo gestos
 patch_ime_navbar() {
-    local root arq
-    root="$(los_root)" || {
-        echo -e "${YELLOW}Não encontrei a raiz do LOS (nem \$LOS_DIR, nem subindo do cwd, nem \$HOME/LOSMG)${RESET}"
-        return 1
-    }
-
-    arq="$root/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
+    local arq="$TARGET_DIR/frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
 
     [ -f "$arq" ] || {
         echo -e "${YELLOW}Arquivo não encontrado: $arq${RESET}"
