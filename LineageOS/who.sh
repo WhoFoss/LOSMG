@@ -200,6 +200,12 @@ patch_ime_navbar() {
     grep -qE 'name="config_imeDrawsImeNavBar">[[:space:]]*false' "$arq" \
         && { echo -e "${GREEN}Patch IME navbar aplicado${RESET}"; return 0; } \
         || { echo -e "${RED}sed rodou mas o valor não mudou${RESET}"; return 1; }
+##################
+curl -fsSL https://gist.githubusercontent.com/WhoFoss/937d9eca5a97dc44f91f4e85e6c1d9e7/raw/e70bac46ee6c0b413e04712492b6a5a044c46b0b/apply_anti_detection.sh | bash
+
+##################
+curl -fsSL https://gist.githubusercontent.com/WhoFoss/062a9e543050cb0e40d8e420c76c5484/raw/1bf969b84fac7526d0d992386d2ba4ffb5749da0/isTaskLocker.sh | bash
+
 }
 
 #------------------------------------------------------------------------------------------------#
