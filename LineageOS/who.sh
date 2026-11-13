@@ -308,7 +308,8 @@ gofile_install()
         -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
 
     grep -q 'alias gofile' ~/.bashrc || echo "alias gofile=\"$TARGET_DIR/gofile\"" >> ~/.bashrc
-}
+}; gofile_install
+
 #------------------------------------------------------------------------------------------------#
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 #------------------------------------------------------------------------------------------------#
@@ -364,7 +365,6 @@ upload() {
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
 patch_ime_navbar || error_exit "patch_ime_navbar failed"
-gofile_install
 patch_signature_spoofing
 patch_version_mk
 remove_apps 
@@ -384,4 +384,4 @@ export SKIP_ABI_CHECKS=true
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
 #clear; brunch sapphire user || error_exit "Brunch failed"
-upload
+#upload
