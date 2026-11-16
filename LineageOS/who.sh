@@ -364,7 +364,7 @@ upload() {
 #------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
-# patch_ime_navbar
+patch_ime_navbar
 patch_signature_spoofing
 patch_version_mk
 remove_apps 
