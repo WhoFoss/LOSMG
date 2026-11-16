@@ -364,7 +364,7 @@ upload() {
 #------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
-patch_ime_navbar
+patch_ime_navbar || error_exit "patch_ime_navbar failed"
 patch_signature_spoofing
 patch_version_mk
 remove_apps 
