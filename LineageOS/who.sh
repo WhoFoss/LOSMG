@@ -258,7 +258,7 @@ setup_lineage_dir() {
 
     mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
     cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
-}; clear; setup_lineage_dir
+}; setup_lineage_dir
 echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
 
 #------------------------------------------------------------------------------------------------#
@@ -383,5 +383,5 @@ export SKIP_ABI_CHECKS=true
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
-clear; brunch sapphire user || error_exit "Brunch failed"
+brunch sapphire user || error_exit "Brunch failed"
 upload
