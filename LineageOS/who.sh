@@ -278,7 +278,7 @@ clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphi
 # Repository Synchronization
 # Download and synchronize the complete source tree
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${YELLOW}Syncing full repo...${RESET}"
+ echo -e "${YELLOW}Syncing full repo...${RESET}"
 repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
@@ -286,7 +286,7 @@ print_header "Repo sync success"
 # Qualcomm HALs
 # Clone the required SM6225 hardware components
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${YELLOW}Cloning HALs for SM6225...${RESET}"
+echo -e "${YELLOW}Cloning HALs for SM6225...${RESET}"
 clone_hal "https://github.com/WF-DT-Sapphire/android_hardware_qcom-caf_common.git" "hardware/qcom-caf/common" "lineage-22.2"
 clone_hal "https://github.com/WF-DT-Sapphire/vendor_qcom_opensource_agm.git" "hardware/qcom-caf/sm6225/audio/agm" "lineage-22.2-caf-sm6225"
 clone_hal "https://github.com/WF-DT-Sapphire/vendor_qcom_opensource_arpal-lx.git" "hardware/qcom-caf/sm6225/audio/pal" "lineage-22.0-caf-sm6225"
@@ -372,7 +372,7 @@ remove_apps
 #------------------------------------------------------------------------------------------------#
 # Build Environment Setup
 #------------------------------------------------------------------------------------------------#
-clear; echo -e "${YELLOW}Setting up build environment...${RESET}"
+echo -e "${YELLOW}Setting up build environment...${RESET}"
 source build/envsetup.sh
 export BUILD_USERNAME=LineageOS-22.2-MicroG
 export BUILD_HOSTNAME=WhoFoss
