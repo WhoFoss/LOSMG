@@ -214,26 +214,6 @@ patch_ime_navbar() {
         || { echo -e "${RED}sed rodou mas o valor não mudou${RESET}"; return 1; }
 }
 
-
-# Baixa o manifest do MicroG do repositório remoto.
-mg_manifest()
-{
-    echo "${CYAN}Baixando MicroG Manifest...${RESET}"
-    mkdir -p .repo/local_manifests
-
-    local tmp_file remote_url
-    tmp_file=$(mktemp)
-    remote_url="https://raw.githubusercontent.com/WhoFoss/LOSMG/refs/heads/Lineage-23.2/MG-MANIFEST/microg.xml"
-
-    if ! curl -fsSL -o "$tmp_file" "$remote_url" || [ ! -s "$tmp_file" ]; then
-        rm -f "$tmp_file"
-        error_exit "Falha ao baixar $remote_url (ou arquivo vazio)"
-    fi
-
-    mv -f "$tmp_file" .repo/local_manifests/microg.xml
-    print_header "MG manifest baixado"
-}
-
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 upload() {
     local build_dir="out/target/product/sapphire"
