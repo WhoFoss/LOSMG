@@ -15,8 +15,8 @@ RESET=$(tput sgr0)
 #----------------------------------#
 # Setup do Terminal
 #----------------------------------#
-tput civis                      # esconde o cursor
-trap 'tput cnorm' EXIT          # restaura ao sair
+tput civis              # esconde o cursor
+trap 'tput cnorm' EXIT  # restaura ao sair
 
 #####################################
 #----------------------------------#
