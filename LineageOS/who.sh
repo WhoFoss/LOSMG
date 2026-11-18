@@ -383,5 +383,5 @@ export SKIP_ABI_CHECKS=true
 # Start ROM compilation
 #------------------------------------------------------------------------------------------------#
 echo -e "${YELLOW}Starting build...${RESET}"
-# brunch sapphire user || error_exit "Brunch failed"
-# upload
+brunch sapphire user || error_exit "Brunch failed"
+upload
