@@ -286,7 +286,7 @@ mg_manifest
 # Repository Synchronization
 #----------------------------------#
 clear; echo "${CYAN}Syncing full repo...${RESET}"
-repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
+repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
 # ========================================
