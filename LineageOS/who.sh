@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-#####################################################################
-# Autor: WhoFoss
-# Programa: los23.sh
-# DESCRIÇÃO: Compila o LineageOS 23.2 com MicroG para o sapphire
-# Dependências: repo, git, curl, wget, sed, tput, sha256sum
-# Recursos: HALs SM6225, MicroG, Signature Spoofing, GoFile
-#####################################################################
-
 #####################################
 #----------------------------------#
 # Cores
@@ -278,7 +270,7 @@ setup_lineage_dir() {
     mkdir -p "$TARGET_DIR" || error_exit "Failed to create $TARGET_DIR"
     cd "$TARGET_DIR" || error_exit "Failed to cd to $TARGET_DIR"
 }; setup_lineage_dir
-echo -e "${YELLOW}Starting LineageOS 22.2 build script...${RESET}"
+echo -e "${YELLOW}Starting LineageOS 23.2 build script...${RESET}"
 
 #----------------------------------#
 # Repository Initialization
