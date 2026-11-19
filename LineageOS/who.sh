@@ -272,7 +272,7 @@ print_header "Repo init success"
 #------------------------------------------------------------------------------------------------#
 # Clona o local_manifests_sapphire
 #------------------------------------------------------------------------------------------------#
-clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
+clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "whofoss15" ".repo/local_manifests"
 
 #------------------------------------------------------------------------------------------------#
 # Repository Synchronization
@@ -308,7 +308,7 @@ gofile_install()
         -O "$TARGET_DIR/gofile" && chmod +x "$TARGET_DIR/gofile" || error_exit "Failed to install gofile"
 
     grep -q 'alias gofile' ~/.bashrc || echo "alias gofile=\"$TARGET_DIR/gofile\"" >> ~/.bashrc
-}; gofile_install
+}
 
 #------------------------------------------------------------------------------------------------#
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
@@ -364,6 +364,7 @@ upload() {
 #------------------------------------------------------------------------------------------------#
 # Coisas que voce não precisa saber
 #------------------------------------------------------------------------------------------------#
+gofile_install
 patch_ime_navbar || error_exit "patch_ime_navbar failed"
 patch_signature_spoofing
 patch_version_mk
