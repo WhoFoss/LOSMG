@@ -79,15 +79,28 @@ clone_hal()
 }
 
 # Aplica o patch de Signature Spoofing em ComputerEngine.java.
-patch_signature_spoofing() {
-    local COMPUTER_ENGINE="frameworks/base/services/core/java/com/android/server/pm/ComputerEngine.java"
+patch_ime_navbar() {
+    local arq="frameworks/base/packages/overlays/NavigationBarModeGesturalOverlay/res/values/config.xml"
+    local verde amarelo vermelho reset
+    verde=$(tput setaf 2)
+    amarelo=$(tput setaf 3)
+    vermelho=$(tput setaf 1)
+    reset=$(tput sgr0)
 
-    [ -f "$COMPUTER_ENGINE" ] || error_exit "ComputerEngine.java not found: $COMPUTER_ENGINE"
-    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" || error_exit "Signature Spoofing: isDebuggable() block not found"
+    [ -f "$arq" ] || {
+        echo "${amarelo}Arquivo não encontrado: $arq${reset}"
+        return 1
+    }
 
-    sed -i '/if (!isDebuggable()) {/{N;N;d}' "$COMPUTER_ENGINE"
+    grep -qE 'name="config_imeDrawsImeNavBar">[[:space:]]*false' "$arq" \
+        && { echo "${verde}Patch IME navbar já aplicado${reset}"; return 0; }
 
-    grep -q 'if (!isDebuggable())' "$COMPUTER_ENGINE" && error_exit "Signature Spoofing patch failed"
+    sed -i -E 's|(name="config_imeDrawsImeNavBar">)[[:space:]]*true|\1false|' "$arq" \
+        || { echo "${vermelho}sed falhou em $arq${reset}"; return 1; }
+
+    grep -qE 'name="config_imeDrawsImeNavBar">[[:space:]]*false' "$arq" \
+        && { echo "${verde}Patch IME navbar aplicado${reset}"; return 0; } \
+        || { echo "${vermelho}sed rodou mas o valor não mudou${reset}"; return 1; }
 }
 
 # Adiciona sufixo -MicroG
