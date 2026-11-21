@@ -212,6 +212,12 @@ EOF
         || printf '\nPRODUCT_PACKAGES += Gramophone\n' >> "${device_mk}"
 }
 
+######(Depois coloco uma descrição)###
+spoof24(){
+curl -fsSL https://gist.githubusercontent.com/WhoFoss/e33ad64780949943347a4e62431f6b6b/raw/1f82ca3a08d96c7681421c8224fa1e80b84abcb2/spoof24.sh | bash; }
+######################################
+
+
 #####################################
 #----------------------------------#
 # Script Principal
@@ -302,6 +308,7 @@ source ~/.bashrc 2>/dev/null || true
 patch_signature_spoofing
 aplicar_patch_safetynet
 patch_version_mk
+spoof24
 patch_gramophone
 # remove_apps
 gofile_install
