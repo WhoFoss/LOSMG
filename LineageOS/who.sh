@@ -177,10 +177,12 @@ aplicar_patch_safetynet() {
     mkdir -p "$dir_patch" || return 1
     wget -q --show-progress -O "$patch" "$url" || { echo "Falha no download"; return 1; }
 
-    cd "$repo" || { echo "Repo não encontrado: $repo"; return 1; }
-
-    git apply --check "$patch" && git apply "$patch" && git diff --stat
+    (
+        cd "$repo" || { echo "Repo não encontrado: $repo"; exit 1; }
+        git apply --check "$patch" && git apply "$patch" && git diff --stat
+    )
 }
+
 
 
 patch_gramophone() {
