@@ -182,6 +182,36 @@ aplicar_patch_safetynet() {
     git apply --check "$patch" && git apply "$patch" && git diff --stat
 }
 
+
+patch_gramophone() {
+    local dir="device/xiaomi/sapphire/prebuilt/gramophone"
+    local device_mk="device/xiaomi/sapphire/device.mk"
+    local url="https://f-droid.org/repo/org.akanework.gramophone_24.apk"
+
+    echo "$(tput setaf 6)$(tput bold)Baixando Gramophone...$(tput sgr0)"
+    mkdir -p "${dir}" \
+        && wget -q --show-progress -O "${dir}/Gramophone.apk.tmp" "${url}" \
+        && mv "${dir}/Gramophone.apk.tmp" "${dir}/Gramophone.apk" \
+        || { rm -f "${dir}/Gramophone.apk.tmp"; echo "$(tput setaf 1)Falha ao baixar Gramophone.apk$(tput sgr0)"; return 1; }
+
+    cat > "${dir}/Android.bp" << 'EOF'
+android_app_import {
+    name: "Gramophone",
+    apk: "Gramophone.apk",
+    presigned: true,
+    preprocessed: true,
+    product_specific: true,
+    dex_preopt: {
+        enabled: false,
+    },
+    overrides: ["Twelve"],
+}
+EOF
+
+    grep -qxF "PRODUCT_PACKAGES += Gramophone" "${device_mk}" \
+        || printf '\nPRODUCT_PACKAGES += Gramophone\n' >> "${device_mk}"
+}
+
 #####################################
 #----------------------------------#
 # Script Principal
@@ -272,6 +302,7 @@ source ~/.bashrc 2>/dev/null || true
 patch_signature_spoofing
 aplicar_patch_safetynet
 patch_version_mk
+patch_gramophone
 # remove_apps
 gofile_install
 
