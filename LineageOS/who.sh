@@ -224,7 +224,7 @@ curl -fsSL https://gist.githubusercontent.com/WhoFoss/e33ad64780949943347a4e6243
 #----------------------------------#
 
 setup_lineage_dir() {
-    LINEAGE_DIR="LOSMG-24"
+    LINEAGE_DIR="LOSMG24"
     TARGET_DIR="$HOME/$LINEAGE_DIR"
 
     [ "$PWD" = "$TARGET_DIR" ] && return
@@ -294,9 +294,9 @@ gofile_install()
 {
 echo -e "${CYAN}Installing gofile upload tool...${RESET}"
 wget -q https://raw.githubusercontent.com/kenway214/GoFile-Upload-Script/master/upload.sh \
-    -O ~/LOSMG-24/gofile && chmod +x ~/LOSMG-24/gofile
+    -O ~/LOSMG24/gofile && chmod +x ~/LOSMG24/gofile
 if ! grep -q 'alias gofile' ~/.bashrc; then
-    echo 'alias gofile="~/LOSMG-24/gofile"' >> ~/.bashrc
+    echo 'alias gofile="~/LOSMG24/gofile"' >> ~/.bashrc
 fi
 source ~/.bashrc 2>/dev/null || true
  print_header "gofile installed"
@@ -333,7 +333,7 @@ echo -e "${CYAN}Starting build...${RESET}"
 # Localiza a ROM mais recente, gera o SHA256 e envia para o GoFile.
 upload() {
     local build_dir="out/target/product/sapphire"
-    local gofile_script="${HOME}/LOSMG-24/gofile"
+    local gofile_script="${HOME}/LOSMG24/gofile"
     local rom_path boot_path rom_name rom_size rom_sha256
     local boot_sha256 rom_output boot_output rom_url boot_url
 
