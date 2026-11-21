@@ -137,7 +137,7 @@ remove_apps() {
     local lista="" i
 
     for ((i = 0; i < ${#apps[@]}; i++)); do
-        lista+="    ${apps[i]}"
+        lista+="${apps[i]}"
         ((i < ${#apps[@]} - 1)) && lista+=" \\"$'\n'
     done
 
@@ -212,14 +212,14 @@ mg_manifest() {
 
     mv -f "$tmp_file" .repo/local_manifests/microg.xml
     print_header "MG manifest baixado"
-}; mg_manifest
+}
 
 
 # ========================================
 # Repository Synchronization
 # ========================================
 clear; echo -e "${CYAN}Syncing full repo...${RESET}"
-repo sync -c -j16 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
+repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
 print_header "Repo sync success"
 
 # ========================================
@@ -257,7 +257,7 @@ source ~/.bashrc 2>/dev/null || true
 #----------------------------------#
 patch_signature_spoofing
 patch_version_mk
-remove_apps
+# remove_apps
 gofile_install
 
 #========================================
