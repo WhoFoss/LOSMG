@@ -168,6 +168,20 @@ EOF
     print_header "Apps removidos: ${apps[*]}"
 }
 
+aplicar_patch_safetynet() {
+    local url="https://raw.githubusercontent.com/lineageos4microg/patches/main/system_core/0001-Pass-SafetyNet-24.0-and-up.patch"
+    local dir_patch="$HOME/patches/system_core"
+    local patch="$dir_patch/$(basename "$url")"
+    local repo="$HOME/LOSMG24/system/core"
+
+    mkdir -p "$dir_patch" || return 1
+    wget -q --show-progress -O "$patch" "$url" || { echo "Falha no download"; return 1; }
+
+    cd "$repo" || { echo "Repo não encontrado: $repo"; return 1; }
+
+    git apply --check "$patch" && git apply "$patch" && git diff --stat
+}
+
 #####################################
 #----------------------------------#
 # Script Principal
@@ -256,6 +270,7 @@ source ~/.bashrc 2>/dev/null || true
 # Coisas que voce não precisa saber
 #----------------------------------#
 patch_signature_spoofing
+aplicar_patch_safetynet
 patch_version_mk
 # remove_apps
 gofile_install
