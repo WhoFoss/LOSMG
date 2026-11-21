@@ -269,7 +269,7 @@ mg_manifest() {
 # Repository Synchronization
 # ========================================
 clear; echo -e "${CYAN}Syncing full repo...${RESET}"
-repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
+repo sync -c -j20 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune || error_exit "Repo sync failed"
 print_header "Repo sync success"
 
 # ========================================
@@ -305,10 +305,10 @@ source ~/.bashrc 2>/dev/null || true
 #----------------------------------#
 # Coisas que voce não precisa saber
 #----------------------------------#
-patch_signature_spoofing
 aplicar_patch_safetynet
 patch_version_mk
 spoof24
+patch_ime_navbar
 patch_gramophone
 # remove_apps
 gofile_install
