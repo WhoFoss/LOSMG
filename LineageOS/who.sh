@@ -311,8 +311,7 @@ print_header "HALs cloned"
 gofile_install
 patch_ime_navbar || error_exit "patch_ime_navbar failed"
 patch_signature_spoofing
-patch_version_mk
-remove_apps 
+patch_version_mk 
 
 #----------------------------------#
 # Build Environment Setup
