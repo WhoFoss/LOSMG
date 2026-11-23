@@ -280,7 +280,6 @@ repo init -u https://github.com/LineageOS/android.git -b lineage-23.2 --git-lfs 
 print_header "Repo init success"
 
 clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire16" ".repo/local_manifests"
-mg_manifest
 
 #----------------------------------#
 # Repository Synchronization
