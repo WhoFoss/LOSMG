@@ -285,7 +285,7 @@ clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphi
 # Repository Synchronization
 #----------------------------------#
 clear; echo "${CYAN}Syncing full repo...${RESET}"
-repo sync -c -j15 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+repo sync -c -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 print_header "Repo sync success"
 
 # ========================================
