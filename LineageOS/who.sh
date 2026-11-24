@@ -103,7 +103,7 @@ print_header "Repo init success"
 #------------------------------------------------------------------------------------------------#
 # Clona o local_manifests_sapphire
 #------------------------------------------------------------------------------------------------#
-clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire15 ".repo/local_manifests"
+clone_repo "https://github.com//WF-DT-Sapphire/local_manifests_sapphire" "sapphire15" ".repo/local_manifests"
 
 #------------------------------------------------------------------------------------------------#
 # Repository Synchronization
